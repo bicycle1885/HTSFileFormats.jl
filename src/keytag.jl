@@ -85,3 +85,7 @@ function Base.show(io::IO, tag::KeyTag)
     write(io, "tag\"", tag.data[1], tag.data[2], '"')
     return
 end
+
+function Base.write(io::IO, tag::KeyTag)
+    return write(io, tag.data[1], tag.data[2])
+end
