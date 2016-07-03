@@ -3,7 +3,7 @@
 #
 # Two-byte tag used as keys for mapping.
 
-immutable KeyTag <: AbstractString
+immutable KeyTag <: DirectIndexString
     data::NTuple{2,UInt8}
 end
 
@@ -47,10 +47,6 @@ end
 
 function Base.hash(tag::KeyTag, h::UInt)
     return hash(tag.data, h)
-end
-
-function Base.length(::KeyTag)
-    return 2
 end
 
 function Base.endof(::KeyTag)
