@@ -21,7 +21,7 @@ type BAMRecord
 end
 
 function BAMRecord()
-    return BAMRecord(0, 0, 0, 0, 0, 0, 0, 0, UInt8[], 0)
+    return BAMRecord(-1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0)
 end
 
 # the data size of fixed-length fields (.refid-.tlen)
@@ -38,6 +38,10 @@ function refid(aln::BAMRecord)
     return aln.refid + 1
 end
 
+function next_refid(aln::BAMRecord)
+    return aln.next_refid + 1
+end
+
 """
     position(aln::BAMRecord)
 
@@ -45,8 +49,12 @@ Return the position of a mapped read.
 
 The index is 1-based and will be 0 for an alignment without mapping position.
 """
-function position(aln::BAMRecord)
+function Base.position(aln::BAMRecord)
     return aln.pos + 1
+end
+
+function next_position(aln::BAMRecord)
+    return aln.next_pos + 1
 end
 
 """
@@ -54,7 +62,7 @@ end
 
 Return the bin of the alignment `aln`.
 """
-function bin(aln::BAMRecord)
+function Base.bin(aln::BAMRecord)
     return UInt16(aln.bin_mq_nl >> 16)
 end
 
@@ -73,7 +81,7 @@ end
 Return the flag of the alignment `aln`.
 """
 function flag(aln::BAMRecord)
-    return UInt16(flag.flag_nc >> 16)
+    return UInt16(aln.flag_nc >> 16)
 end
 
 """
@@ -92,7 +100,7 @@ Return the read name of the alignment `aln`.
 """
 function seqname(aln::BAMRecord)
     # drop the last NUL character
-    return unsafe_string(pointer(aln.data), seqname_length(aln) - 1)
+    return unsafe_string(pointer(aln.data), max(seqname_length(aln) - 1, 0))
 end
 
 """
@@ -103,14 +111,14 @@ See also `cigar`.
 """
 function cigar_rle(aln::BAMRecord)
     offset = seqname_length(aln)
-    ops = Align.Operation[]
+    ops = Bio.Align.Operation[]
     lens = Int[]
     for i in offset+1:4:offset+n_cigar_op(aln)*4
         x = UInt32(aln.data[i])         |
             UInt32(aln.data[i+1]) <<  8 |
             UInt32(aln.data[i+2]) << 16 |
             UInt32(aln.data[i+3]) << 24
-        op = Align.Operation(x & 0x0f)
+        op = Bio.Align.Operation(x & 0x0f)
         len = x >> 4
         push!(ops, op)
         push!(lens, len)
