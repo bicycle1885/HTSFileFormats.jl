@@ -5,6 +5,8 @@ export
     @tag_str,
     BAM,
     BAMRecord,
+    SAM,
+    SAMRecord,
     refid,
     next_refid,
     position,
@@ -20,7 +22,11 @@ export
     header
 
 import Bio
+import Bio: Ragel
+import Bio.Seq: DNASequence
 import BGZFStreams: BGZFStream
+import BufferedStreams   # this is necessary though I don't know why.
+import BufferedStreams: BufferedInputStream
 import DataStructures: OrderedDict
 
 include("keytag.jl")
