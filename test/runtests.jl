@@ -6,6 +6,17 @@ function testfile(filename)
     return Pkg.dir("HTSFileFormats", "test", filename)
 end
 
+@testset "KeyTag" begin
+    @test KeyTag("BF") == KeyTag("BF")
+    @test KeyTag("BF") != KeyTag("AP")
+    @test tag"BF" == KeyTag("BF") == KeyTag('B', 'F') == KeyTag(0x42, 0x46)
+    t = tag"BF"
+    @test length(t) == endof(t) == 2
+    @test t[1] == 'B'
+    @test t[2] == 'F'
+    @test collect(t) == ['B', 'F']
+end
+
 @testset "BAM" begin
     @testset "Reader" begin
         reader = open(testfile("bam1.bam"), BAM)

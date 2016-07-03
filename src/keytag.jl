@@ -7,8 +7,23 @@ immutable KeyTag <: AbstractString
     data::NTuple{2,UInt8}
 end
 
-function KeyTag(x::UInt8, y::UInt8)
-    return KeyTag((x, y))
+"""
+    KeyTag(s::AbstractString)
+    KeyTag(t1::Char, t2::Char)
+    KeyTag(t1::UInt8, t2::UInt8)
+
+Create a tag string used as keys for mapping.
+"""
+function KeyTag(s::AbstractString)
+    return convert(KeyTag, s)
+end
+
+function KeyTag(t1::Char, t2::Char)
+    return KeyTag(UInt8(t1), UInt8(t2))
+end
+
+function KeyTag(t1::UInt8, t2::UInt8)
+    return KeyTag((t1, t2))
 end
 
 function Base.convert(::Type{KeyTag}, str::AbstractString)

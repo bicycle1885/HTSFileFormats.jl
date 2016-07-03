@@ -1,6 +1,7 @@
 module HTSFileFormats
 
 export
+    KeyTag,
     @tag_str,
     BAM,
     BAMRecord,
