@@ -18,6 +18,21 @@ end
     @test collect(t) == ['B', 'F']
 end
 
+@testset "SAM" begin
+    @testset "Reader" begin
+        reader = open(testfile("sam1.sam"), SAM)
+        @test isa(reader, HTSFileFormats.SAMReader)
+        n = 0
+        aln = SAMRecord()
+        while !eof(reader)
+            read!(reader, aln)
+            n += 1
+        end
+        close(reader)
+        @test n == 200
+    end
+end
+
 @testset "BAM" begin
     @testset "Record" begin
         rec = BAMRecord()

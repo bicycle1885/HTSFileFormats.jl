@@ -18,6 +18,10 @@ function Base.eof(reader::SAMReader)
     return eof(reader.state.stream)
 end
 
+function Base.close(reader::SAMReader)
+    close(reader.state.stream)
+end
+
 function Base.open(input::BufferedInputStream, ::Type{SAM})
     return SAMReader(input)
 end
