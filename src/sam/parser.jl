@@ -426,7 +426,7 @@ if 33 <= (data[1+(p )])&& (data[1+(p )])<= 126
 end
 @goto st0
 @label ctr19
-Ragel.@copy_from_anchor!(output.refname)
+Ragel.@copy_from_anchor!(output.next_refname)
 @goto st14
 @label st14
 p+= 1
@@ -460,7 +460,7 @@ if 48 <= (data[1+(p )])&& (data[1+(p )])<= 57
 end
 @goto st0
 @label ctr22
-output.pos = Ragel.@int64_from_anchor!
+output.next_pos = Ragel.@int64_from_anchor!
 @goto st16
 @label st16
 p+= 1

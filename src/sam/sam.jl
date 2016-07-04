@@ -18,6 +18,18 @@ const auxtype = Dict{UInt8,DataType}(
     UInt8('d') => Float64,
     UInt8('Z') => String)
 
+const auxtypechar = Dict{DataType,Char}(
+    Char    => 'A',
+    Int8    => 'c',
+    UInt8   => 'C',
+    Int16   => 's',
+    UInt16  => 'S',
+    Int32   => 'i',
+    UInt32  => 'I',
+    Float32 => 'f',
+    Float64 => 'd',
+    String  => 'Z')
+
 # Parse hexadecimal byte format string.
 function parse_hexbytearray(s)
     return [parse(UInt8, s[i:i+1], 16) for i in 1:2:endof(s)]
@@ -39,3 +51,4 @@ include("header.jl")
 include("record.jl")
 include("reader.jl")
 include("parser.jl")
+include("writer.jl")

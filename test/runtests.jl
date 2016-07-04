@@ -31,6 +31,33 @@ end
         close(reader)
         @test n == 200
     end
+
+    @testset "Round trip" begin
+        mktemp() do path, io
+            # copy
+            reader = open(testfile("sam1.sam"), SAM)
+            writer = HTSFileFormats.SAMWriter(io)
+            write(writer, header(reader))
+            aln = SAMRecord()
+            while !eof(reader)
+                read!(reader, aln)
+                write(writer, aln)
+            end
+            close(reader)
+            close(writer)
+
+            # read again
+            reader = open(path, SAM)
+            n = 0
+            aln = SAMRecord()
+            while !eof(reader)
+                read!(reader, aln)
+                n += 1
+            end
+            close(reader)
+            @test n == 200
+        end
+    end
 end
 
 @testset "BAM" begin

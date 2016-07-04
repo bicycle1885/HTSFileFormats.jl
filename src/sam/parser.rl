@@ -46,6 +46,14 @@
         Ragel.@copy_from_anchor!(output.cigar)
     }
 
+    action next_rname {
+        Ragel.@copy_from_anchor!(output.next_refname)
+    }
+
+    action next_pos {
+        output.next_pos = Ragel.@int64_from_anchor!
+    }
+
     action tlen {
         output.tlen = Ragel.@int64_from_anchor!
     }
@@ -106,6 +114,8 @@
     pos   = digit+ >anchor %pos;
     mapq  = digit+ >anchor %mapq;
     cigar = ('*' | (digit+ [MIDNSHPX=])+) >anchor %cigar;
+    next_rname = graph+ >anchor %next_rname;
+    next_pos   = digit+ >anchor %next_pos;
     tlen  = ('-'? digit+) >anchor %tlen;
     seq   = ('*' | [A-Za-z=.]+) >anchor %seq;
     qual  = graph+ >anchor %qual;
@@ -124,8 +134,8 @@
         pos   '\t'
         mapq  '\t'
         cigar '\t'
-        rname '\t'
-        pos   '\t'
+        next_rname '\t'
+        next_pos   '\t'
         tlen  '\t'
         seq   '\t'
         qual ('\t' optfield)*

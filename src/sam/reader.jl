@@ -1,4 +1,4 @@
-# BAM Reader
+# SAM Reader
 # ==========
 
 type SAMReader <: Bio.IO.AbstractParser
@@ -8,6 +8,10 @@ type SAMReader <: Bio.IO.AbstractParser
     function SAMReader(input::BufferedInputStream)
         return new(Ragel.State(samparser_start, input), Dict())
     end
+end
+
+function header(reader::SAMReader)
+    return reader.header
 end
 
 function Base.eltype(::Type{SAMReader})
