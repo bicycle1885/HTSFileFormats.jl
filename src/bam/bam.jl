@@ -14,6 +14,7 @@ include("header.jl")
 include("record.jl")
 include("reader.jl")
 include("writer.jl")
+include("auxdict.jl")
 
 function Base.open(filename::AbstractString, mode::AbstractString, ::Type{BAM})
     if mode[1] == 'r'
