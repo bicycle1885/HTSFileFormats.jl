@@ -9,10 +9,6 @@
         Ragel.@anchor!
     }
 
-    action init {
-        empty!(output.optional_fields)
-    }
-
     action qname {
         Ragel.@copy_from_anchor!(output.name)
     }
@@ -53,13 +49,26 @@
         for i in 1:endof(qualstr)
             output.qual[i] = UInt8(qualstr[i]) - 33
         end
+        empty!(output.optional_fields)
     }
 
     action optfield {
         optfieldstr = Ragel.@ascii_from_anchor!()
         tag = KeyTag(optfieldstr[1], optfieldstr[2])
         typ = optfieldstr[4]
-        output.optional_fields[tag] = optfieldstr[6:end]
+        if typ == 'A'
+            value = optfieldstr[6]
+        elseif typ == 'Z'
+            value = optfieldstr[6:end]
+        elseif typ == 'H'
+            value = parse_hexbytearray(optfieldstr[6:end])
+        elseif typ == 'B'
+            eltyp = auxtype[UInt8[optfieldstr[6]]]
+            value = [parse(eltyp, x) for x in split(optfieldstr[8:end], ',')]
+        else
+            value = parse(auxtype[UInt8(typ)], optfieldstr[6:end])
+        end
+        output.optional_fields[tag] = value
     }
 
     action record {
@@ -69,6 +78,8 @@
     }
 
     newline = '\n' >count_line;
+    sign    = ('-' | '+')?;
+    float   = sign? digit* '.'? digit+ ([eE] sign? digit+)?;
 
     qname = (graph - '@')+ >anchor %qname;
     flag  = digit+ >anchor %flag;
@@ -83,7 +94,13 @@
     tag      = alpha alnum;
     typ      = [A-Za-z];
     value    = print+;
-    optfield = (tag ':' typ ':' value) >anchor %optfield;
+    optfield = (tag ':' (
+        ("A:" graph) |
+        ("Z:" print+) |
+        ("H:" [0-9A-F]+) |
+        ("B:" (',' float)+) |
+        ("f:" float) |
+        ([cCsSiI] ':' sign? digit+))) >anchor %optfield;
 
     record = (
         qname '\t'
@@ -97,7 +114,7 @@
         tlen  '\t'
         seq   '\t'
         qual ('\t' optfield)*
-        newline) >init %record;
+        newline) %record;
 
     main := record*;
 }%%

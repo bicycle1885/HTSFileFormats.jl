@@ -45,18 +45,6 @@ end
 # Internals
 # ---------
 
-const auxtype = Dict{UInt8,DataType}(
-    UInt8('A') => Char,
-    UInt8('c') => Int8,
-    UInt8('C') => UInt8,
-    UInt8('s') => Int16,
-    UInt8('S') => UInt16,
-    UInt8('i') => Int32,
-    UInt8('I') => UInt32,
-    UInt8('f') => Float32,
-    UInt8('d') => Float64,
-    UInt8('Z') => String)
-
 function _auxiliary(data::Vector{UInt8}, pos::Integer, t1::UInt8, t2::UInt8)
     p::Int = pos
 
