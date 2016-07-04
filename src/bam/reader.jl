@@ -32,8 +32,7 @@ function Base.open(filename::AbstractString, ::Type{BAM})
 
     # SAM header
     textlen = read(stream, Int32)
-    header = read(stream, UInt8, textlen)
-    samheader = read_samheader(IOBuffer(header))
+    samheader = parse_samheader(read(stream, UInt8, textlen))
 
     # reference sequences
     refseqnames = String[]

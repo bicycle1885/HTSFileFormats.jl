@@ -9,6 +9,19 @@
         Ragel.@anchor!
     }
 
+    action header {
+        header = Ragel.@ascii_from_anchor!()
+        tag = KeyTag(header[2], header[3])
+        if !haskey(input.header, tag)
+            input.header[tag] = []
+        end
+        if tag == tag"CO"
+            push!(input.header[tag], header[5:end-1])
+        else
+            push!(input.header[tag], parse_keyvals(header[5:end-1]))
+        end
+    }
+
     action qname {
         Ragel.@copy_from_anchor!(output.name)
     }
@@ -80,6 +93,12 @@
     newline = '\n' >count_line;
     sign    = ('-' | '+')?;
     float   = sign? digit* '.'? digit+ ([eE] sign? digit+)?;
+    tag     = alpha alnum;
+
+    comment = (any - newline)*;
+    keyval  = (tag ':' print+);
+
+    header = ('@' ("CO\t" comment | tag ('\t' keyval)+) newline) >anchor %header;
 
     qname = (graph - '@')+ >anchor %qname;
     flag  = digit+ >anchor %flag;
@@ -90,10 +109,6 @@
     tlen  = ('-'? digit+) >anchor %tlen;
     seq   = ('*' | [A-Za-z=.]+) >anchor %seq;
     qual  = graph+ >anchor %qual;
-
-    tag      = alpha alnum;
-    typ      = [A-Za-z];
-    value    = print+;
     optfield = (tag ':' (
         ("A:" graph) |
         ("Z:" print+) |
@@ -116,7 +131,7 @@
         qual ('\t' optfield)*
         newline) %record;
 
-    main := record*;
+    main := header* record*;
 }%%
 
 %% write data;
@@ -128,3 +143,53 @@ Ragel.@generate_read!_function(
     begin
         %% write exec;
     end)
+
+
+# header only
+%%{
+    machine samheaderparser;
+
+    action anchor {
+        anchor = p + 1
+    }
+
+    action header {
+        line = String(data[anchor:p])
+        tag = KeyTag(line[2], line[3])
+        if !haskey(header, tag)
+            header[tag] = []
+        end
+        if tag == tag"CO"
+            push!(header[tag], line[5:end-1])
+        else
+            push!(header[tag], parse_keyvals(line[5:end-1]))
+        end
+    }
+
+    newline = '\n';
+    tag     = alpha alnum;
+
+    comment = (any - newline)*;
+    keyval  = (tag ':' print+);
+
+    header = ('@' ("CO\t" comment | tag ('\t' keyval)+) newline) >anchor %header;
+
+    main := header*;
+}%%
+
+%% write data;
+
+function parse_samheader(data)
+    header = Dict{KeyTag,Vector}()
+
+    p = 0
+    pe = eof = endof(data)
+    anchor = 0
+
+    %% write init;
+    %% write exec;
+
+    @assert cs >= samheaderparser_first_final
+
+    return header
+end

@@ -23,6 +23,17 @@ function parse_hexbytearray(s)
     return [parse(UInt8, s[i:i+1], 16) for i in 1:2:endof(s)]
 end
 
+function parse_keyvals(s)
+    ret = Dict{KeyTag,Any}()
+    for pair in split(s, '\t')
+        if pair[3] != ':'
+            error("':' is expected")
+        end
+        ret[KeyTag(pair[1:2])] = pair[4:end]
+    end
+    return ret
+end
+
 include("flags.jl")
 include("header.jl")
 include("record.jl")
