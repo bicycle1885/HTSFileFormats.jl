@@ -18,6 +18,10 @@ function Base.close(reader::BAMReader)
     close(reader.stream)
 end
 
+function Base.seek(reader::BAMReader, voffset::VirtualOffset)
+    seek(reader.stream, voffset)
+end
+
 function Base.open(filename::AbstractString, ::Type{BAM})
     stream = BGZFStream(filename)
 
