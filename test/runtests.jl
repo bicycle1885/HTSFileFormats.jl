@@ -8,6 +8,21 @@ function testfile(filename)
 end
 
 @testset "SAM" begin
+    @testset "Record" begin
+        rec = SAMRecord()
+        # default values
+        @test seqname(rec) == ""
+        @test flag(rec) == 0x0000
+        @test refname(rec) == "*"
+        @test next_refname(rec) == "*"
+        @test position(rec) == 0
+        @test next_position(rec) == 0
+        @test template_length(rec) == 0
+        @test cigar(rec) == "*"
+        @test sequence(rec) == dna""
+        @test qualities(rec) == UInt8[]
+    end
+
     @testset "Reader" begin
         reader = open(testfile("sam1.sam"), SAM)
         @test isa(reader, HTSFileFormats.SAMReader)

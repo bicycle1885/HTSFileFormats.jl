@@ -5,6 +5,8 @@ export
     BAMRecord,
     SAM,
     SAMRecord,
+    refname,
+    next_refname,
     refid,
     next_refid,
     position,
