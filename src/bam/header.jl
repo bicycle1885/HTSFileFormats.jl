@@ -2,11 +2,11 @@
 # ==========
 
 type BAMHeader
-    samheader::OrderedDict{String,Any}
+    samheader::Dict{String,Any}
     refseqnames::Vector{String}
     refseqlens::Vector{Int}
 end
 
 function BAMHeader()
-    return BAMHeader(OrderedDict{String,Any}())
+    return BAMHeader(Dict{String,Any}())
 end

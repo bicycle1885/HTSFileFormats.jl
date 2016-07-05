@@ -27,7 +27,6 @@ import Bio.Seq: DNASequence
 import BGZFStreams: BGZFStream
 import BufferedStreams   # this is necessary though I don't know why.
 import BufferedStreams: BufferedInputStream
-import DataStructures: OrderedDict
 
 include("keytag.jl")
 include("sam/sam.jl")

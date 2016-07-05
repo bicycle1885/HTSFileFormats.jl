@@ -1,4 +1,4 @@
-# BAM Writer
+# iAM Writer
 # ==========
 
 type BAMWriter <: Bio.IO.AbstractWriter
@@ -18,7 +18,7 @@ function Base.write(writer::BAMWriter, header::BAMHeader)
 
     # SAM header
     buf = IOBuffer()
-    l = write_samheader(buf, header.samheader)
+    l = write(SAMWriter(buf), header.samheader)
     n += write(stream, Int32(l))
     n += write(stream, takebuf_array(buf))
 
