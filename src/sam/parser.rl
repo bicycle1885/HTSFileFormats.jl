@@ -11,11 +11,11 @@
 
     action header {
         header = Ragel.@ascii_from_anchor!()
-        tag = KeyTag(header[2], header[3])
+        tag = header[2:3]
         if !haskey(input.header, tag)
             input.header[tag] = []
         end
-        if tag == tag"CO"
+        if tag == "CO"
             push!(input.header[tag], header[5:end-1])
         else
             push!(input.header[tag], parse_keyvals(header[5:end-1]))
@@ -75,7 +75,7 @@
 
     action optfield {
         optfieldstr = Ragel.@ascii_from_anchor!()
-        tag = KeyTag(optfieldstr[1], optfieldstr[2])
+        tag = optfieldstr[1:2]
         typ = optfieldstr[4]
         if typ == 'A'
             value = optfieldstr[6]
@@ -165,11 +165,11 @@ Ragel.@generate_read!_function(
 
     action header {
         line = String(data[anchor:p])
-        tag = KeyTag(line[2], line[3])
+        tag = line[2:3]
         if !haskey(header, tag)
             header[tag] = []
         end
-        if tag == tag"CO"
+        if tag == "CO"
             push!(header[tag], line[5:end-1])
         else
             push!(header[tag], parse_keyvals(line[5:end-1]))
@@ -190,7 +190,7 @@ Ragel.@generate_read!_function(
 %% write data;
 
 function parse_samheader(data)
-    header = Dict{KeyTag,Vector}()
+    header = Dict{String,Vector}()
 
     p = 0
     pe = eof = endof(data)

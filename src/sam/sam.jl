@@ -6,6 +6,15 @@ The SAM file format.
 """
 immutable SAM <: Bio.IO.FileFormat end
 
+function checkkeytag(tag)
+    if !isa(tag, AbstractString)
+        throw(ArgumentError("tag must be a string"))
+    elseif length(tag) != 2
+        throw(ArgumentError("tag length must be 2"))
+    end
+    return
+end
+
 const auxtype = Dict{UInt8,DataType}(
     UInt8('A') => Char,
     UInt8('c') => Int8,
@@ -36,12 +45,12 @@ function parse_hexbytearray(s)
 end
 
 function parse_keyvals(s)
-    ret = Dict{KeyTag,Any}()
+    ret = Dict{String,Any}()
     for pair in split(s, '\t')
         if pair[3] != ':'
             error("':' is expected")
         end
-        ret[KeyTag(pair[1:2])] = pair[4:end]
+        ret[pair[1:2]] = pair[4:end]
     end
     return ret
 end

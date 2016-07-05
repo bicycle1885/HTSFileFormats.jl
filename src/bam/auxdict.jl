@@ -8,18 +8,18 @@
 
 # This is not designed for very large dictionaries: time complexities in lookup
 # and update operations are O(N).
-immutable AuxDataDict <: Associative{KeyTag,Any}
+immutable AuxDataDict <: Associative{String,Any}
     data::Vector{UInt8}
 end
 
-function Base.getindex(dict::AuxDataDict, key)
-    tag = convert(KeyTag, key)
-    return _auxiliary(dict.data, 1, tag.data[1], tag.data[2])
+function Base.getindex(dict::AuxDataDict, tag)
+    checkkeytag(tag)
+    return _auxiliary(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
 end
 
-function Base.eltype(::Type{AuxDataDict})
-    return Tuple{KeyTag,Any}
-end
+#function Base.eltype(::Type{AuxDataDict})
+#    return Tuple{String,Any}
+#end
 
 function Base.length(dict::AuxDataDict)
     return count_auxtags(dict.data, 1)
@@ -35,7 +35,7 @@ end
 
 function Base.next(dict::AuxDataDict, pos)
     data = dict.data
-    tag = KeyTag(data[pos], data[pos+1])
+    tag = String([data[pos], data[pos+1]])
     pos, typ = getauxtype(data, pos + 2)
     pos, value = getauxdata(data, pos, typ)
     return (tag, value), pos

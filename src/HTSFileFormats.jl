@@ -1,8 +1,6 @@
 module HTSFileFormats
 
 export
-    KeyTag,
-    @tag_str,
     BAM,
     BAMRecord,
     SAM,
@@ -28,7 +26,6 @@ import BGZFStreams: BGZFStream
 import BufferedStreams   # this is necessary though I don't know why.
 import BufferedStreams: BufferedInputStream
 
-include("keytag.jl")
 include("sam/sam.jl")
 include("bam/bam.jl")
 

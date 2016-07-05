@@ -11,14 +11,14 @@ end
 
 function Base.write(writer::SAMWriter, header::Dict)
     n = 0
-    if haskey(header, tag"HD")
-        for h in header[tag"HD"]
+    if haskey(header, "HD")
+        for h in header["HD"]
             n += write_headerline(writer.stream, "HD", h)
         end
     end
 
     for tag in keys(header)
-        if tag == tag"HD"
+        if tag == "HD"
             continue
         end
         for h in header[tag]
@@ -32,8 +32,9 @@ end
 function write_headerline(io, tag, line)
     n = 0
     n += write(io, '@', tag)
-    for (key, val) in line
-        n += write(io, '\t', string(key), ':', string(val))
+    for (t, val) in line
+        checkkeytag(t)
+        n += write(io, '\t', t, ':', string(val))
     end
     n += write(io, '\n')
     return n
@@ -65,6 +66,7 @@ end
 function write_optfields(io, optfields)
     n = 0
     for (tag, val) in optfields
+        checkkeytag(tag)
         n += write(io, '\t', tag, ':', auxtypechar[typeof(val)], ':', string(val))
     end
     return n

@@ -13,7 +13,7 @@ type SAMRecord
     tlen::Int32
     seq::DNASequence
     qual::Vector{UInt8}
-    optional_fields::Dict{KeyTag,Any}
+    optional_fields::Dict{String,Any}
 end
 
 function SAMRecord()

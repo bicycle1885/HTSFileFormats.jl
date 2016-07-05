@@ -188,11 +188,11 @@ begin
 	@goto st1
 	@label ctr86
 	header = Ragel.@ascii_from_anchor!()
-	tag = KeyTag(header[2], header[3])
+	tag = header[2:3]
 	if !haskey(input.header, tag)
 		input.header[tag] = []
 	end
-	if tag == tag"CO"
+	if tag == "CO"
 		push!(input.header[tag], header[5:end-1])
 else
 	push!(input.header[tag], parse_keyvals(header[5:end-1]))
@@ -602,7 +602,7 @@ end
 	@goto st23
 @label ctr46
 optfieldstr = Ragel.@ascii_from_anchor!()
-		tag = KeyTag(optfieldstr[1], optfieldstr[2])
+		tag = optfieldstr[1:2]
 		typ = optfieldstr[4]
 		if 	typ == 'A'
 	value = optfieldstr[6]
@@ -754,7 +754,7 @@ end
 	@goto st71
 @label ctr47
 optfieldstr = Ragel.@ascii_from_anchor!()
-		tag = KeyTag(optfieldstr[1], optfieldstr[2])
+		tag = optfieldstr[1:2]
 		typ = optfieldstr[4]
 		if 	typ == 'A'
 	value = optfieldstr[6]
@@ -1298,11 +1298,11 @@ Ragel.@anchor!
 @goto st59
 @label ctr87
 header = Ragel.@ascii_from_anchor!()
-tag = KeyTag(header[2], header[3])
+tag = header[2:3]
 if !haskey(input.header, tag)
 	input.header[tag] = []
 end
-if tag == tag"CO"
+if tag == "CO"
 	push!(input.header[tag], header[5:end-1])
 else
 			push!(input.header[tag], parse_keyvals(header[5:end-1]))
@@ -1739,11 +1739,11 @@ cs = 69
 if p == eof
 	if cs  == 72
 		header = Ragel.@ascii_from_anchor!()
-		tag = KeyTag(header[2], header[3])
+		tag = header[2:3]
 		if !haskey(input.header, tag)
 			input.header[tag] = []
 		end
-		if tag == tag"CO"
+		if tag == "CO"
 			push!(input.header[tag], header[5:end-1])
 	else
 		push!(input.header[tag], parse_keyvals(header[5:end-1]))
@@ -1770,7 +1770,7 @@ const _samheaderparser_nfa_offsets = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 const _samheaderparser_nfa_push_actions = Int8[0, 0 , ]
 const _samheaderparser_nfa_pop_trans = Int8[0, 0 , ]
 function parse_samheader(data)
-	header = Dict{	KeyTag,Vector}()
+	header = Dict{	String,Vector}()
 
 p = 0
 pe = eof = endof(data)
@@ -1826,11 +1826,11 @@ anchor = p + 1
 @goto st1
 @label ctr13
 line = String(data[anchor:p])
-tag = KeyTag(line[2], line[3])
+tag = line[2:3]
 if !haskey(header, tag)
 	header[tag] = []
 end
-if tag == tag"CO"
+if tag == "CO"
 	push!(header[tag], line[5:end-1])
 else
 			push!(header[tag], parse_keyvals(line[5:end-1]))
@@ -2083,11 +2083,11 @@ cs = 11
 if p == eof
 	if cs  == 13
 		line = String(data[anchor:p])
-		tag = KeyTag(line[2], line[3])
+		tag = line[2:3]
 		if !haskey(header, tag)
 			header[tag] = []
 		end
-		if tag == tag"CO"
+		if tag == "CO"
 			push!(header[tag], line[5:end-1])
 	else
 		push!(header[tag], parse_keyvals(line[5:end-1]))
