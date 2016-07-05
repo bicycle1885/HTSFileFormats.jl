@@ -67,3 +67,7 @@ end
 function qualities(r::SAMRecord)
     return r.qual
 end
+
+function Base.getindex(r::SAMRecord, field::AbstractString)
+    return r.optional_fields[field]
+end

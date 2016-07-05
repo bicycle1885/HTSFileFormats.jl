@@ -17,9 +17,9 @@ function Base.getindex(dict::AuxDataDict, tag)
     return _auxiliary(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
 end
 
-#function Base.eltype(::Type{AuxDataDict})
-#    return Tuple{String,Any}
-#end
+function Base.eltype(::Type{AuxDataDict})
+    return Tuple{String,Any}
+end
 
 function Base.length(dict::AuxDataDict)
     return count_auxtags(dict.data, 1)
@@ -48,12 +48,12 @@ end
 function _auxiliary(data::Vector{UInt8}, pos::Integer, t1::UInt8, t2::UInt8)
     p::Int = pos
 
-    while p ≤ length(data) && (data[p] != t1 || data[p+1] != t2)
+    while p ≤ length(data) && !(data[p] == t1 && data[p+1] == t2)
         p = next_tag_position(data, p)
     end
 
     if p > length(data)
-        throw(KeyError(KeyTag(t1, t2)))
+        throw(KeyError(String([t1, t2])))
     else
         p, typ = getauxtype(data, p + 2)
         _, value = getauxdata(data, p, typ)

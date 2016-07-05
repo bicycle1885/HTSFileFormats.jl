@@ -170,6 +170,12 @@ function auxiliary(aln::BAMRecord)
     return AuxDataDict(aln.data[offset+1:end])
 end
 
+function Base.getindex(aln::BAMRecord, field::AbstractString)
+    seqlen = sequence_length(aln)
+    offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2) + seqlen
+    return _auxiliary(aln.data, offset + 1, UInt8(field[1]), UInt8(field[2]))
+end
+
 # Return the length of the read name.
 function seqname_length(aln)
     return aln.bin_mq_nl & 0xff

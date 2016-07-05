@@ -28,6 +28,12 @@ end
         @test isa(reader, HTSFileFormats.SAMReader)
         n = 0
         aln = SAMRecord()
+        read!(reader, aln)
+        n += 1
+        read!(reader, aln)
+        n += 1
+        @test aln["XT"] === 'U'
+        @test aln["NM"] === Int32(5)
         while !eof(reader)
             read!(reader, aln)
             n += 1
@@ -87,6 +93,13 @@ end
         @test isa(reader, HTSFileFormats.BAMReader)
         n = 0
         aln = BAMRecord()
+        read!(reader, aln)
+        n += 1
+        read!(reader, aln)
+        n += 1
+        @test aln["XT"] === 'U'
+        # TODO: check type
+        @test aln["NM"] == 5
         while !eof(reader)
             read!(reader, aln)
             n += 1
