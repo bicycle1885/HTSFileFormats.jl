@@ -75,7 +75,7 @@ function refname(r::BAMRecord)
     if id == 0
         return "*"
     else
-        return r.header[id]
+        return r.header.refseqnames[id]
     end
 end
 
@@ -84,7 +84,7 @@ function next_refname(r::BAMRecord)
     if id == 0
         return "*"
     else
-        return r.header[id]
+        return r.header.refseqnames[id]
     end
 end
 
