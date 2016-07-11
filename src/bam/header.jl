@@ -8,5 +8,5 @@ type BAMHeader
 end
 
 function BAMHeader()
-    return BAMHeader(Dict{String,Any}())
+    return BAMHeader(Dict{String,Any}(), String[], Int[])
 end

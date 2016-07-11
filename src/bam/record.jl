@@ -18,10 +18,14 @@ type BAMRecord
 
     # filled bytes of data (≤ length(.data))
     datasize::Int
+
+    # file header (shared)
+    header::BAMHeader
 end
 
 function BAMRecord()
-    return BAMRecord(-1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0)
+    return BAMRecord(
+        -1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0, BAMHeader())
 end
 
 # the data size of fixed-length fields (.refid-.tlen)
@@ -40,6 +44,31 @@ end
 
 function next_refid(aln::BAMRecord)
     return aln.next_refid + 1
+end
+
+"""
+    refname(rec::BAMRecord)
+
+Return the name of a reference sequence that `rec` is mapped onto.
+
+If `rec` is unmapped, it returns `"*"` like SAM records.
+"""
+function refname(r::BAMRecord)
+    id = refid(r)
+    if id == 0
+        return "*"
+    else
+        return r.header[id]
+    end
+end
+
+function next_refname(r::BAMRecord)
+    id = next_refid(r)
+    if id == 0
+        return "*"
+    else
+        return r.header[id]
+    end
 end
 
 """

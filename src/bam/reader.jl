@@ -62,5 +62,6 @@ function Base.read!(reader::BAMReader, aln::BAMRecord)
     end
     unsafe_read(reader.stream, pointer(aln.data), datasize)
     aln.datasize = datasize
+    aln.header = reader.header
     return aln
 end
