@@ -20,6 +20,22 @@ function SAMRecord()
     return SAMRecord("", 0x0000, "*", 0, 0, "*", "*", 0, 0, "", UInt8[], Dict())
 end
 
+function Base.show(io::IO, rec::SAMRecord)
+    println(summary(rec), ':')
+    println(io, "reference name: ", refname(rec))
+    println(io, "next reference name: ", next_refname(rec))
+    println(io, "position: ", position(rec))
+    println(io, "next position: ", next_position(rec))
+    println(io, "mapping quality: ", mapping_quality(rec))
+    println(io, "flag: ", flag(rec))
+    println(io, "template length: ", template_length(rec))
+    println(io, "sequence name: ", seqname(rec))
+    println(io, "CIGAR string: ", cigar(rec))
+    println(io, "sequence: ", sequence(rec))
+    println(io, "base qualities: ", qualities(rec))
+      print(io, "optional fields: ", rec.optional_fields)
+end
+
 function Base.copy(rec::SAMRecord)
     return deepcopy(rec)
 end
@@ -49,7 +65,7 @@ function next_position(r::SAMRecord)
 end
 
 function mapping_quality(r::SAMRecord)
-    return d.mapq
+    return r.mapq
 end
 
 function template_length(r::SAMRecord)

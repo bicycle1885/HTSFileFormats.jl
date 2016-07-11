@@ -28,6 +28,23 @@ function BAMRecord()
         -1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0, BAMHeader())
 end
 
+function Base.show(io::IO, rec::BAMRecord)
+    println(summary(rec), ":")
+    println(io, "reference name: ", refname(rec))
+    println(io, "next reference name: ", next_refname(rec))
+    println(io, "position: ", position(rec))
+    println(io, "next position: ", position(rec))
+    println(io, "bin: ", bits(bin(rec)))
+    println(io, "mapping quality: ", mapping_quality(rec))
+    println(io, "flag: ", flag(rec))
+    println(io, "template length: ", template_length(rec))
+    println(io, "sequence name: ", seqname(rec))
+    println(io, "CIGAR string: ", cigar(rec))
+    println(io, "sequence: ", sequence(rec))
+    println(io, "qualities: ", qualities(rec))
+      print(io, "auxiliary: ", auxiliary(rec))
+end
+
 # the data size of fixed-length fields (.refid-.tlen)
 const BAM_FIXED_FIELDS_BYTES = 32
 
