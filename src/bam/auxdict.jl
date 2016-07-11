@@ -90,7 +90,7 @@ function getauxdata(data::Vector{UInt8}, p::Int, ::Type{String})
     dataptr = pointer(data, p)
     endptr = ccall(:memchr, Ptr{Void}, (Ptr{Void}, Cint, Csize_t),
                    dataptr, '\0', length(data) - p + 1)
-    q = p + (endptr - dataptr) - 1
+    q::Int = p + (endptr - dataptr) - 1
     return q + 2, String(data[p:q])
 end
 
