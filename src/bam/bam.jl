@@ -15,6 +15,7 @@ include("record.jl")
 include("reader.jl")
 include("writer.jl")
 include("auxdict.jl")
+include("chunk.jl")
 include("bai.jl")
 
 function Base.open(filename::AbstractString, mode::AbstractString, ::Type{BAM})

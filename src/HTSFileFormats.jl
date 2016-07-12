@@ -5,6 +5,7 @@ export
     BAMRecord,
     SAM,
     SAMRecord,
+    BAI,
     refname,
     next_refname,
     refid,
