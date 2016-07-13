@@ -222,7 +222,7 @@ Return a auxiliary data dictionary of the alignment `aln`.
 function auxiliary(aln::BAMRecord)
     seqlen = sequence_length(aln)
     offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2) + seqlen
-    return AuxDataDict(aln.data[offset+1:end])
+    return AuxDataDict(aln.data[offset+1:aln.datasize])
 end
 
 function Base.getindex(aln::BAMRecord, field::AbstractString)
