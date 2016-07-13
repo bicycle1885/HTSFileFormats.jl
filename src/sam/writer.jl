@@ -9,12 +9,10 @@ function Base.close(writer::SAMWriter)
     close(writer.stream)
 end
 
-function Base.write(writer::SAMWriter, header::Dict)
+function Base.write(writer::SAMWriter, header::SAMHeader)
     n = 0
     if haskey(header, "HD")
-        for h in header["HD"]
-            n += write_headerline(writer.stream, "HD", h)
-        end
+        n += write_headerline(writer.stream, "HD", header["HD"])
     end
 
     for tag in keys(header)

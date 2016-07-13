@@ -2,10 +2,13 @@ module HTSFileFormats
 
 export
     BAM,
+    BAMHeader,
     BAMRecord,
     SAM,
+    SAMHeader,
     SAMRecord,
     BAI,
+    ismapped,
     refname,
     next_refname,
     refid,

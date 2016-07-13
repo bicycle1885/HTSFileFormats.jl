@@ -190,7 +190,7 @@ Ragel.@generate_read!_function(
 %% write data;
 
 function parse_samheader(data)
-    header = Dict{String,Vector}()
+    header = SAMHeader()
 
     p = 0
     pe = eof = endof(data)

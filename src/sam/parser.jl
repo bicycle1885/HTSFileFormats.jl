@@ -1770,7 +1770,7 @@ const _samheaderparser_nfa_offsets = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 const _samheaderparser_nfa_push_actions = Int8[0, 0 , ]
 const _samheaderparser_nfa_pop_trans = Int8[0, 0 , ]
 function parse_samheader(data)
-	header = Dict{	String,Vector}()
+    header = SAMHeader()
 
 p = 0
 pe = eof = endof(data)

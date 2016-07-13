@@ -3,10 +3,10 @@
 
 type SAMReader <: Bio.IO.AbstractParser
     state::Ragel.State
-    header::Dict{String,Vector}
+    header::SAMHeader
 
     function SAMReader(input::BufferedInputStream)
-        return new(Ragel.State(samparser_start, input), Dict())
+        return new(Ragel.State(samparser_start, input), SAMHeader())
     end
 end
 
