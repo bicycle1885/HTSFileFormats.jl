@@ -28,6 +28,22 @@ function BAMRecord()
         -1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0, BAMHeader())
 end
 
+# NOTE: this does not copy the header field.
+function Base.copy(rec::BAMRecord)
+    return BAMRecord(
+        rec.refid,
+        rec.pos,
+        rec.bin_mq_nl,
+        rec.flag_nc,
+        rec.l_seq,
+        rec.next_refid,
+        rec.next_pos,
+        rec.tlen,
+        copy(rec.data),
+        rec.datasize,
+        rec.header)
+end
+
 function Base.show(io::IO, rec::BAMRecord)
     println(summary(rec), ":")
     println(io, "reference name: ", refname(rec))

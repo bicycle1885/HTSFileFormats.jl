@@ -79,6 +79,19 @@ function Base.read!(reader::BAMReader, aln::BAMRecord)
     return aln
 end
 
+function Base.start(reader::BAMReader)
+    return BAMRecord()
+end
+
+function Base.done(reader::BAMReader, rec)
+    return eof(reader)
+end
+
+function Base.next(reader::BAMReader, rec)
+    read!(reader, rec)
+    return copy(rec), rec
+end
+
 type BAMIntersectionIterator
     reader::BAMReader
     chunks::Vector{Chunk}
