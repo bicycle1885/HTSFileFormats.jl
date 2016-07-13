@@ -41,6 +41,10 @@ function Base.setindex!(header::SAMHeader, val, key::AbstractString)
     return header
 end
 
+function Base.delete!(header::SAMHeader, key::AbstractString)
+    return delete!(header.data, key)
+end
+
 function Base.start(header::SAMHeader)
     return start(header.data)
 end

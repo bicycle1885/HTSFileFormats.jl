@@ -8,6 +8,20 @@ function testfile(filename)
 end
 
 @testset "SAM" begin
+    @testset "SAMHeader" begin
+        h = SAMHeader()
+        @test isa(h, Associative)
+        @test isempty(h)
+        h["HD"] = Dict("VN" => "100.100", "SO" => "unknown")
+        @test length(h) == 1
+        @test h["HD"]["VN"] == "100.100"
+        h["CO"] = ["comment1", "comment2"]
+        @test length(h) == 2
+        @test h["CO"] == ["comment1", "comment2"]
+        delete!(h, "CO")
+        @test length(h) == 1
+    end
+
     @testset "Record" begin
         rec = SAMRecord()
         @test !ismapped(rec)
