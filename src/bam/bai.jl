@@ -11,7 +11,7 @@ type BAI
     n_no_coors::Nullable{UInt64}
 end
 
-function chunks(index::BAI, refid::Integer, grange::UnitRange)
+function overlap_chunks(index::BAI, refid::Integer, grange::UnitRange)
     if isempty(grange)
         return Chunk[]
     end
@@ -28,7 +28,8 @@ function chunks(index::BAI, refid::Integer, grange::UnitRange)
             end
         end
     end
-    return sort!(ret)
+    sort!(ret)
+    return ret
 end
 
 function Base.read(input::IO, ::Type{BAI})

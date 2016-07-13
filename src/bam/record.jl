@@ -49,6 +49,15 @@ end
 const BAM_FIXED_FIELDS_BYTES = 32
 
 """
+    ismapped(rec::BAMRecord)
+
+Return `true` if and only if `rec` is mapped to a reference sequence.
+"""
+function ismapped(rec::BAMRecord)
+    return rec.pos != -1
+end
+
+"""
     refid(aln::BAMRecord)
 
 Return the index of a reference sequence that `aln` is mapped onto.

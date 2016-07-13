@@ -25,7 +25,7 @@ export
 import Bio
 import Bio: Ragel
 import Bio.Seq: DNASequence
-import BGZFStreams: BGZFStream, VirtualOffset
+import BGZFStreams: BGZFStream, VirtualOffset, virtualoffset
 import BufferedStreams   # this is necessary though I don't know why.
 import BufferedStreams: BufferedInputStream
 

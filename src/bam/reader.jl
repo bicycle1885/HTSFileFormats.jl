@@ -2,8 +2,10 @@
 # ==========
 
 type BAMReader <: Bio.IO.AbstractParser
+    filepath::String
     stream::BGZFStream
     header::BAMHeader
+    index::Nullable{BAI}
 end
 
 function header(reader::BAMReader)
@@ -51,7 +53,18 @@ function Base.open(filename::AbstractString, ::Type{BAM})
         push!(refseqlens, seqlen)
     end
 
-    return BAMReader(stream, BAMHeader(samheader, refseqnames, refseqlens))
+    reader = BAMReader(
+        filename,
+        stream,
+        BAMHeader(samheader, refseqnames, refseqlens),
+        Nullable())
+
+    index_filepath = reader.filepath * ".bai"
+    if isfile(index_filepath)
+        loadindex!(reader, index_filepath)
+    end
+
+    return reader
 end
 
 function Base.read!(reader::BAMReader, aln::BAMRecord)
@@ -64,4 +77,86 @@ function Base.read!(reader::BAMReader, aln::BAMRecord)
     aln.datasize = datasize
     aln.header = reader.header
     return aln
+end
+
+type BAMIntersectionIterator
+    reader::BAMReader
+    chunks::Vector{Chunk}
+    refid::Int
+    interval::UnitRange{Int}
+end
+
+function Base.start(iter::BAMIntersectionIterator)
+    rec = BAMRecord()
+    return advance!(iter, rec, 1)
+end
+
+function Base.done(iter::BAMIntersectionIterator, i_rec)
+    i, _ = i_rec
+    return i > endof(iter.chunks)
+end
+
+function Base.next(iter::BAMIntersectionIterator, i_rec)
+    i, rec = i_rec
+    retrec = deepcopy(rec)
+    return retrec, advance!(iter, rec, i)
+end
+
+function advance!(iter, rec, i)
+    while i ≤ endof(iter.chunks)
+        chunk = iter.chunks[i]
+        while virtualoffset(iter.reader.stream) < chunk.stop
+            read!(iter.reader, rec)
+            if isoverlap(rec, iter.refid, iter.interval)
+                return i, rec
+            end
+        end
+        i += 1
+        if i ≤ endof(iter.chunks)
+            seek(iter.reader, iter.chunks[i].start)
+        end
+    end
+    return i, rec
+end
+
+function isoverlap(rec, refid_, interval)
+    leftmost = position(rec)
+
+    if !ismapped(rec) || refid(rec) != refid_ || leftmost > last(interval) || isempty(interval)
+        return false
+    end
+
+    # TODO: this might be slow because allocations are needed.
+    rightmost = leftmost
+    ops, lens = cigar_rle(rec)
+    for (op, len) in zip(ops, lens)
+        if Bio.Align.ismatchop(op)
+            rightmost += len
+        end
+    end
+
+    return rightmost ≥ first(interval)
+end
+
+function Base.intersect(reader::BAMReader, refid::Integer, interval::UnitRange)
+    if isnull(reader.index)
+        error("no index")
+    end
+    chunks = overlap_chunks(get(reader.index), refid, interval)
+    return BAMIntersectionIterator(reader, chunks, refid, interval)
+end
+
+function Base.intersect(reader::BAMReader, refname::AbstractString, interval::UnitRange)
+    refid = findfirst(reader.header.refseqnames, refname)
+    if refid == 0
+        error("sequence name $refname is not in the header")
+    end
+    return intersect(reader, refid, interval)
+end
+
+function loadindex!(reader, filepath)
+    open(filepath) do input
+        reader.index = read(input, BAI)
+    end
+    return reader
 end

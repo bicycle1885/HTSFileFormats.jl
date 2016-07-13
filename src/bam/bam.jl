@@ -10,13 +10,13 @@ The BAM file format.
 """
 immutable BAM <: Bio.IO.FileFormat end
 
+include("chunk.jl")
+include("bai.jl")
 include("header.jl")
 include("record.jl")
 include("reader.jl")
 include("writer.jl")
 include("auxdict.jl")
-include("chunk.jl")
-include("bai.jl")
 
 function Base.open(filename::AbstractString, mode::AbstractString, ::Type{BAM})
     if mode[1] == 'r'
