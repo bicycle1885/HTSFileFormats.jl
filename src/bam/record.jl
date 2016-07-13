@@ -19,16 +19,15 @@ type BAMRecord
     # filled bytes of data (≤ length(.data))
     datasize::Int
 
-    # file header (shared)
-    header::BAMHeader
+    # reference sequence names (shared)
+    refseqnames::Vector{String}
 end
 
 function BAMRecord()
-    return BAMRecord(
-        -1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0, BAMHeader())
+    return BAMRecord(-1, -1, 0, 0, 0, -1, -1, 0, UInt8[], 0, String[])
 end
 
-# NOTE: this does not copy the header field.
+# NOTE: this does not copy `refseqnames`.
 function Base.copy(rec::BAMRecord)
     return BAMRecord(
         rec.refid,
@@ -41,7 +40,7 @@ function Base.copy(rec::BAMRecord)
         rec.tlen,
         copy(rec.data),
         rec.datasize,
-        rec.header)
+        rec.refseqnames)
 end
 
 function Base.show(io::IO, rec::BAMRecord)
@@ -100,7 +99,7 @@ function refname(r::BAMRecord)
     if id == 0
         return "*"
     else
-        return r.header.refseqnames[id]
+        return r.refseqnames[id]
     end
 end
 
@@ -109,7 +108,7 @@ function next_refname(r::BAMRecord)
     if id == 0
         return "*"
     else
-        return r.header.refseqnames[id]
+        return r.refseqnames[id]
     end
 end
 

@@ -130,8 +130,9 @@ end
         mktemp() do path, _
             # copy
             reader = open(testfile("bam1.bam"), BAM)
-            writer = HTSFileFormats.BAMWriter(BGZFStream(path, "w"))
-            write(writer, header(reader))
+            writer = HTSFileFormats.BAMWriter(
+                BGZFStream(path, "w"),
+                header(reader, true))
             aln = BAMRecord()
             while !eof(reader)
                 read!(reader, aln)

@@ -4,11 +4,35 @@
 type BAMReader <: Bio.IO.AbstractParser
     filepath::String
     stream::BGZFStream
-    header::BAMHeader
+    header::SAMHeader
+    refseqnames::Vector{String}
+    refseqlens::Vector{Int}
     index::Nullable{BAI}
 end
 
-function header(reader::BAMReader)
+function Base.show(io::IO, reader::BAMReader)
+    println(io, summary(reader), ":")
+    println("  filepath: ", reader.filepath)
+    println("  header: ", reader.header)
+      print("  reference sequences:")
+    for (i, (name, len)) in enumerate(zip(reader.refseqnames, reader.refseqlens))
+        println(io)
+        print("    [", lpad(i, 2), "]: ", name, " (length: ", len, ")")
+    end
+end
+
+function header(reader::BAMReader, fillSQ::Bool=false)
+    if fillSQ
+        if haskey(reader.header, "SQ")
+            # TODO: check consistency
+        else
+            records = Dict{String,Any}[]
+            for (name, len) in zip(reader.refseqnames, reader.refseqlens)
+                push!(records, Dict("SN" => name, "LN" => len))
+            end
+            reader.header["SQ"] = records
+        end
+    end
     return reader.header
 end
 
@@ -56,7 +80,9 @@ function Base.open(filename::AbstractString, ::Type{BAM})
     reader = BAMReader(
         filename,
         stream,
-        BAMHeader(samheader, refseqnames, refseqlens),
+        samheader,
+        refseqnames,
+        refseqlens,
         Nullable())
 
     index_filepath = reader.filepath * ".bai"
@@ -75,7 +101,7 @@ function Base.read!(reader::BAMReader, aln::BAMRecord)
     end
     unsafe_read(reader.stream, pointer(aln.data), datasize)
     aln.datasize = datasize
-    aln.header = reader.header
+    aln.refseqnames = reader.refseqnames
     return aln
 end
 
@@ -160,7 +186,7 @@ function Base.intersect(reader::BAMReader, refid::Integer, interval::UnitRange)
 end
 
 function Base.intersect(reader::BAMReader, refname::AbstractString, interval::UnitRange)
-    refid = findfirst(reader.header.refseqnames, refname)
+    refid = findfirst(reader.refseqnames, refname)
     if refid == 0
         error("sequence name $refname is not in the header")
     end
