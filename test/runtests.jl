@@ -10,6 +10,7 @@ end
 @testset "SAM" begin
     @testset "Record" begin
         rec = SAMRecord()
+        @test !ismapped(rec)
         # default values
         @test seqname(rec) == ""
         @test flag(rec) == 0x0000
@@ -73,6 +74,7 @@ end
 @testset "BAM" begin
     @testset "Record" begin
         rec = BAMRecord()
+        @test !ismapped(rec)
         # default values
         @test refname(rec) == "*"
         @test refid(rec) == 0

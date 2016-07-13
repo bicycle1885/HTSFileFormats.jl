@@ -40,6 +40,10 @@ function Base.copy(rec::SAMRecord)
     return deepcopy(rec)
 end
 
+function ismapped(r::SAMRecord)
+    return r.pos != 0
+end
+
 function seqname(r::SAMRecord)
     return r.name
 end
