@@ -23,7 +23,7 @@ end
 
 function Base.next(iter::BAMIntersectionIterator, i_rec)
     i, rec = i_rec
-    retrec = deepcopy(rec)
+    retrec = copy(rec)
     return retrec, advance!(iter, rec, i)
 end
 
