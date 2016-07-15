@@ -114,6 +114,9 @@ end
         @test cigar(rec) == ""
         @test sequence(rec) == dna""
         @test qualities(rec) == UInt8[]
+
+        @test HTSFileFormats.rightmost_position(rec) === Int32(-1)
+        @test HTSFileFormats.alignment_length(rec) === 0
     end
 
     @testset "Reader" begin

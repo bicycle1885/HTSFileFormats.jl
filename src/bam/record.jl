@@ -248,10 +248,7 @@ end
 
 # Return the right-most position of alignment.
 function rightmost_position(rec::BAMRecord)
-    if !ismapped(rec)
-        return 0
-    end
-    return position(rec) + alignment_length(rec) - 1
+    return Int32(position(rec) + alignment_length(rec) - 1)
 end
 
 # Return the length of alignment.
