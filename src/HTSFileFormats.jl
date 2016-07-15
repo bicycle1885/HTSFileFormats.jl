@@ -24,6 +24,7 @@ export
     sequence,
     qualities,
     header,
+    overlapchunks,
     # SAM flags
     SAM_FLAG_PAIRED,
     SAM_FLAG_PROPER_PAIR,

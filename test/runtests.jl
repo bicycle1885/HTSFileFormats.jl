@@ -185,7 +185,7 @@ end
                 ("chr3", 9_800_000:10_000_000,  3),
                 ("chr3", 9_900_000:10_000_000,  0)]
             n = 0
-            for chunk in HTSFileFormats.overlapchunks(index, seqname, interval)
+            for chunk in overlapchunks(index, seqname, interval)
                 seek(stream, chunk)
                 while virtualoffset(stream) in chunk
                     line = readline(stream)
