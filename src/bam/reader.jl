@@ -181,7 +181,7 @@ function Base.intersect(reader::BAMReader, refid::Integer, interval::UnitRange)
     if isnull(reader.index)
         error("no index")
     end
-    chunks = overlap_chunks(get(reader.index), refid, interval)
+    chunks = overlapchunks(get(reader.index), refid, interval)
     return BAMIntersectionIterator(reader, chunks, refid, interval)
 end
 

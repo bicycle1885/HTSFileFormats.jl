@@ -28,7 +28,7 @@ region. The user need to check the condition as:
         # the line overlaps the query region
     end
 """
-function overlapchunks(index::Tabix, seqid::Integer, interval::UnitRange)
+function overlapchunks(index::Union{BAI,Tabix}, seqid::Integer, interval::UnitRange)
     if !(1 ≤ seqid ≤ endof(index.indexes))
         throw(ArgumentError("sequence id $(seqid) is out of range"))
     end
@@ -37,7 +37,7 @@ function overlapchunks(index::Tabix, seqid::Integer, interval::UnitRange)
         return Chunk[]
     end
 
-    binindex, linindex = index.indexes[seqid]
+    binindex, linindex, pbin = index.indexes[seqid]
     bins = reg2bins(first(interval), last(interval))
     offset = linindex[cld(first(interval), LinearWindowSize)]
     ret = Chunk[]

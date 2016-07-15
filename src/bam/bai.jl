@@ -16,7 +16,7 @@ type PseudoBin
 end
 
 type BAI
-    indexes::Vector{Tuple{BinIndex,LinearIndex,PseudoBin}}
+    indexes::Vector{Tuple{BinIndex,LinearIndex,Nullable{PseudoBin}}}
     n_no_coors::Nullable{UInt64}
 end
 
@@ -44,12 +44,12 @@ end
 
 # Read indexes for BAI and Tabix file formats.
 function read_indexes(input, n_refs)
-    indexes = Tuple{BinIndex,LinearIndex,PseudoBin}[]
+    indexes = Tuple{BinIndex,LinearIndex,Nullable{PseudoBin}}[]
     for _ in 1:n_refs
         # load a binning index (and a pseudo bin)
         n_bins = read(input, Int32)
         binindex = BinIndex()
-        local pbin::PseudoBin
+        pbin = Nullable{PseudoBin}()
         for _ in 1:n_bins
             bin = read(input, UInt32)
             n_chunks = read(input, Int32)
@@ -60,10 +60,10 @@ function read_indexes(input, n_refs)
                 chunk_end = read(input, UInt64)
                 n_mapped = read(input, UInt64)
                 n_unmapped = read(input, UInt64)
-                pbin = PseudoBin(
+                pbin = Nullable(PseudoBin(
                     Chunk(chunk_beg, chunk_end),
                     n_mapped,
-                    n_unmapped)
+                    n_unmapped))
             else
                 chunks = Chunk[]
                 for i in 1:n_chunks

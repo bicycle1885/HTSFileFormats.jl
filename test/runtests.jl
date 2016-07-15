@@ -153,6 +153,17 @@ end
             @test n == 200
         end
     end
+
+    @testset "random access" begin
+        reader = open(testfile("test.bam"), BAM)
+        for (seqname, interval, expected) in [("chr1", 8000:10000, 20)]
+            n = 0
+            for rec in intersect(reader, seqname, interval)
+                n += 1
+            end
+            @test n == expected
+        end
+    end
 end
 
 @testset "Tabix" begin

@@ -7,7 +7,7 @@ type Tabix
     meta::Char
     skip::Int
     names::Vector{String}
-    indexes::Vector{Tuple{BinIndex,LinearIndex,PseudoBin}}
+    indexes::Vector{Tuple{BinIndex,LinearIndex,Nullable{PseudoBin}}}
     n_no_coor::Nullable{UInt64}
 end
 
