@@ -246,6 +246,27 @@ function Base.getindex(aln::BAMRecord, field::AbstractString)
     return _auxiliary(aln.data, offset + 1, UInt8(field[1]), UInt8(field[2]))
 end
 
+# Return the right-most position of alignment.
+function rightmost_position(rec::BAMRecord)
+    if !ismapped(rec)
+        return 0
+    end
+    return position(rec) + alignment_length(rec) - 1
+end
+
+function alignment_length(rec::BAMRecord)
+    offset = seqname_length(rec)
+    length::Int = 0
+    for i in offset+1:4:offset+n_cigar_op(rec)*4
+        x = unsafe_load(Ptr{UInt32}(pointer(rec.data, i)))
+        op = Bio.Align.Operation(x & 0x0f)
+        if Bio.Align.ismatchop(op) || Bio.Align.isdeleteop(op)
+            length += x >> 4
+        end
+    end
+    return length
+end
+
 # Return the length of the read name.
 function seqname_length(aln)
     return aln.bin_mq_nl & 0xff

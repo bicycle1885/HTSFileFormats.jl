@@ -45,22 +45,10 @@ function advance!(iter, rec, i)
 end
 
 function isoverlapping(rec, refid_, interval)
-    leftmost = position(rec)
-
-    if !ismapped(rec) || refid(rec) != refid_ || leftmost > last(interval) || isempty(interval)
-        return false
-    end
-
-    # TODO: this might be slow because allocations are needed.
-    rightmost = leftmost - 1
-    ops, lens = cigar_rle(rec)
-    for (op, len) in zip(ops, lens)
-        if Bio.Align.ismatchop(op) || Bio.Align.isdeleteop(op)
-            rightmost += len
-        end
-    end
-
-    return rightmost ≥ first(interval)
+    return ismapped(rec) &&
+        refid(rec) == refid_ &&
+        position(rec) ≤ last(interval) &&
+        rightmost_position(rec) ≥ first(interval)
 end
 
 function Base.intersect(reader::BAMReader, refid::Integer, interval::UnitRange)
