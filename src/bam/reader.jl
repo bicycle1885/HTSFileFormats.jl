@@ -126,6 +126,9 @@ type BAMIntersectionIterator
 end
 
 function Base.start(iter::BAMIntersectionIterator)
+    if !isempty(iter.chunks)
+        seek(iter.reader, first(iter.chunks).start)
+    end
     rec = BAMRecord()
     return advance!(iter, rec, 1)
 end
@@ -169,7 +172,7 @@ function isoverlap(rec, refid_, interval)
     rightmost = leftmost
     ops, lens = cigar_rle(rec)
     for (op, len) in zip(ops, lens)
-        if Bio.Align.ismatchop(op)
+        if Bio.Align.ismatchop(op) || Bio.Align.isdeleteop(op)
             rightmost += len
         end
     end

@@ -156,9 +156,14 @@ end
 
     @testset "random access" begin
         reader = open(testfile("test.bam"), BAM)
-        for (seqname, interval, expected) in [("chr1", 8000:10000, 20)]
+        for (name, interval, expected) in [
+                ("chr1", 1000:10000, 21),
+                ("chr1", 8000:10000, 20),
+                ("chr1", 766_000:800_000, 142),
+                ("chr1", 786_000:800_000, 1),
+                ("chr1", 796_000:800_000, 0)]
             n = 0
-            for rec in intersect(reader, seqname, interval)
+            for rec in intersect(reader, name, interval)
                 n += 1
             end
             @test n == expected
