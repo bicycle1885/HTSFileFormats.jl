@@ -254,6 +254,7 @@ function rightmost_position(rec::BAMRecord)
     return position(rec) + alignment_length(rec) - 1
 end
 
+# Return the length of alignment.
 function alignment_length(rec::BAMRecord)
     offset = seqname_length(rec)
     length::Int = 0
