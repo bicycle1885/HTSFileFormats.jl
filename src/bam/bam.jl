@@ -16,6 +16,7 @@ include("record.jl")
 include("reader.jl")
 include("writer.jl")
 include("auxdict.jl")
+include("intersect.jl")
 
 function Base.open(filename::AbstractString, mode::AbstractString, ::Type{BAM})
     if mode[1] == 'r'

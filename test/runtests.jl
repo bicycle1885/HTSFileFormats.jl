@@ -7,6 +7,16 @@ function testfile(filename)
     return Pkg.dir("HTSFileFormats", "test", filename)
 end
 
+function rand_interval(intval)
+    x = rand(intval)
+    y = rand(intval)
+    if x < y
+        return x:y
+    else
+        return y:x
+    end
+end
+
 @testset "SAM" begin
     @testset "SAMHeader" begin
         h = SAMHeader()
@@ -167,6 +177,27 @@ end
                 n += 1
             end
             @test n == expected
+        end
+
+        for n in 1:50
+            name = "chr1"
+            refid = 1
+            interval = rand_interval(1:1_000_000)
+
+            expected = BAMRecord[]
+            seekstart(reader)
+            for rec in reader
+                if HTSFileFormats.isoverlapping(rec, refid, interval)
+                    push!(expected, rec)
+                end
+            end
+
+            actual = BAMRecord[]
+            for rec in intersect(reader, name, interval)
+                push!(actual, rec)
+            end
+
+            @test map(seqname, actual) == map(seqname, expected)
         end
     end
 end
