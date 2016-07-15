@@ -7,6 +7,7 @@ export
     BAM,
     BAMRecord,
     BAI,
+    Tabix,
     ismapped,
     refname,
     next_refname,
@@ -47,5 +48,6 @@ import BufferedStreams: BufferedInputStream
 
 include("sam/sam.jl")
 include("bam/bam.jl")
+include("tabix/tabix.jl")
 
 end # module

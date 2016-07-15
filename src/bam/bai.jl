@@ -1,35 +1,23 @@
 # BAI
 # ===
 
+# Binning index
 typealias BinIndex Dict{UInt32,Vector{Chunk}}
+
+# Linear index
 typealias LinearIndex Vector{VirtualOffset}
 
 const LinearWindowSize = 16 * 1024
 
-type BAI
-    indexes::Vector{Tuple{BinIndex,LinearIndex}}
-    n_no_coors::Nullable{UInt64}
+type PseudoBin
+    unmapped::Chunk
+    n_mapped::UInt64
+    n_unmapped::UInt64
 end
 
-function overlap_chunks(index::BAI, refid::Integer, grange::UnitRange)
-    if isempty(grange)
-        return Chunk[]
-    end
-    binindex, linindex = index.indexes[refid]
-    bins = reg2bins(first(grange), last(grange))
-    offset = linindex[cld(first(grange), LinearWindowSize)]
-    ret = Chunk[]
-    for bin in bins
-        if haskey(binindex, bin)
-            for chunk in binindex[bin]
-                if chunk.stop > offset
-                    push!(ret, chunk)
-                end
-            end
-        end
-    end
-    sort!(ret)
-    return ret
+type BAI
+    indexes::Vector{Tuple{BinIndex,LinearIndex,PseudoBin}}
+    n_no_coors::Nullable{UInt64}
 end
 
 function Base.read(input::IO, ::Type{BAI})
@@ -42,31 +30,8 @@ function Base.read(input::IO, ::Type{BAI})
         error("input is not a valid BAI file")
     end
 
-    indexes = Tuple{BinIndex,LinearIndex}[]
     n_refs = read(input, Int32)
-    for _ in 1:n_refs
-        binindex = BinIndex()
-        n_bins = read(input, Int32)
-        for _ in 1:n_bins
-            bin = read(input, UInt32)
-            n_chunks = read(input, Int32)
-            chunks = Vector{Chunk}()
-            for i in 1:n_chunks
-                chunk_beg::VirtualOffset = read(input, UInt64)
-                chunk_end::VirtualOffset = read(input, UInt64)
-                push!(chunks, Chunk(chunk_beg, chunk_end))
-            end
-            binindex[bin] = chunks
-        end
-
-        n_intvs = read(input, Int32)
-        linindex = LinearIndex()
-        for _ in 1:n_intvs
-            push!(linindex, read(input, UInt64))
-        end
-
-        push!(indexes, (binindex, linindex))
-    end
+    indexes = read_indexes(input, n_refs)
 
     if !eof(input)
         n_no_coors = Nullable(read(input, UInt64))
@@ -75,6 +40,52 @@ function Base.read(input::IO, ::Type{BAI})
     end
 
     return BAI(indexes, n_no_coors)
+end
+
+# Read indexes for BAI and Tabix file formats.
+function read_indexes(input, n_refs)
+    indexes = Tuple{BinIndex,LinearIndex,PseudoBin}[]
+    for _ in 1:n_refs
+        # load a binning index (and a pseudo bin)
+        n_bins = read(input, Int32)
+        binindex = BinIndex()
+        local pbin::PseudoBin
+        for _ in 1:n_bins
+            bin = read(input, UInt32)
+            n_chunks = read(input, Int32)
+            if bin == 37450
+                # pseudo-bin
+                @assert n_chunks == 2
+                chunk_beg = read(input, UInt64)
+                chunk_end = read(input, UInt64)
+                n_mapped = read(input, UInt64)
+                n_unmapped = read(input, UInt64)
+                pbin = PseudoBin(
+                    Chunk(chunk_beg, chunk_end),
+                    n_mapped,
+                    n_unmapped)
+            else
+                chunks = Chunk[]
+                for i in 1:n_chunks
+                    chunk_beg = read(input, UInt64)
+                    chunk_end = read(input, UInt64)
+                    push!(chunks, Chunk(chunk_beg, chunk_end))
+                end
+                binindex[bin] = chunks
+            end
+        end
+
+        # load a linear index
+        n_intvs = read(input, Int32)
+        linindex = LinearIndex()
+        for _ in 1:n_intvs
+            push!(linindex, read(input, UInt64))
+        end
+
+        push!(indexes, (binindex, linindex, pbin))
+    end
+
+    return indexes
 end
 
 # Calculate bins overlapping a region [from, to] (one-based).
