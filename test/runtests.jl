@@ -34,6 +34,10 @@ end
     @test length(dict) == 2
     @test dict["NM"] === 0x01
     @test dict["MD"] == "8T1T39"
+    dict["NM"] = 0x00
+    @test dict["NM"] === 0x00
+    dict["MD"] = "50"
+    @test dict["MD"] == "50"
 end
 
 @testset "SAM" begin

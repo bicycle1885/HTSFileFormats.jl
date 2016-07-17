@@ -37,6 +37,12 @@ function Base.getindex(dict::AuxDataDict, tag::AbstractString)
     return getvalue(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
 end
 
+function Base.setindex!(dict::AuxDataDict, val, tag::AbstractString)
+    checkkeytag(tag)
+    setvalue!(dict.data, 1, val, UInt8(tag[1]), UInt8(tag[2]))
+    return dict
+end
+
 function Base.eltype(::Type{AuxDataDict})
     return Tuple{String,Any}
 end
@@ -73,6 +79,32 @@ function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     pos, T = getauxtype(data, pos + 2)
     _, val = getauxdata(data, pos, T)
     return val
+end
+
+function setvalue!(data::Vector{UInt8}, pos::Int, val, t1::UInt8, t2::UInt8)
+    pos = find_tag(data, pos, t1, t2)
+    if pos > 0
+        data[pos] = data[pos+1] = 0xff
+    end
+
+    # TODO: in-place update if possible
+    pos = length(data)
+    if isa(val, AbstractString)
+        resize!(data, length(data) + 2 + 1 + sizeof(val) + 1)
+    else
+        resize!(data, length(data) + 2 + 1 + sizeof(val))
+    end
+    T = typeof(val)
+    data[pos+1] = t1
+    data[pos+2] = t2
+    data[pos+3] = UInt8(auxtypechar[T])
+    if isa(val, AbstractString)
+        ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, pos + 4), pointer(val), length(val))
+        data[end] = 0x00
+    else
+        unsafe_store!(Ptr{T}(pointer(data, pos + 4)), val)
+    end
+    return data
 end
 
 function find_tag(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
