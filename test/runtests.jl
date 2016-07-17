@@ -38,6 +38,7 @@ end
     @test dict["NM"] === 0x00
     dict["MD"] = "50"
     @test dict["MD"] == "50"
+    @test collect(dict) == ["NM" => 0x00, "MD" => "50"]
 end
 
 @testset "SAM" begin
