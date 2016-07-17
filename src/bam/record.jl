@@ -241,9 +241,10 @@ function auxiliary(aln::BAMRecord)
 end
 
 function Base.getindex(aln::BAMRecord, field::AbstractString)
+    checkkeytag(field)
     seqlen = sequence_length(aln)
     offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2) + seqlen
-    return _auxiliary(aln.data, offset + 1, UInt8(field[1]), UInt8(field[2]))
+    return getvalue(aln.data, offset + 1, UInt8(field[1]), UInt8(field[2]))
 end
 
 # Return the right-most position of alignment.

@@ -6,15 +6,19 @@
 # This file is a part of BioJulia.
 # License is MIT: https://github.com/BioJulia/Bio.jl/blob/master/LICENSE.md
 
-# This is not designed for very large dictionaries: time complexities in lookup
-# and update operations are O(N).
+# This type is not designed for very large dictionaries: time complexities in lookup
+# and update operations are O(N). The memory layout is depicted as follows:
+#
+#   data: |tag (2 bytes)|value type (1 byte)|value (variable)|tag|...
+#
+# Note that tag = 0xffff indicates the value must be skipped because it is outdated.
 immutable AuxDataDict <: Associative{String,Any}
     data::Vector{UInt8}
 end
 
-function Base.getindex(dict::AuxDataDict, tag)
+function Base.getindex(dict::AuxDataDict, tag::AbstractString)
     checkkeytag(tag)
-    return _auxiliary(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
+    return getvalue(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
 end
 
 function Base.eltype(::Type{AuxDataDict})
@@ -45,19 +49,25 @@ end
 # Internals
 # ---------
 
-function _auxiliary(data::Vector{UInt8}, pos::Integer, t1::UInt8, t2::UInt8)
-    p::Int = pos
-
-    while p ≤ length(data) && !(data[p] == t1 && data[p+1] == t2)
-        p = next_tag_position(data, p)
+function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
+    pos = find_tag(data, pos, t1, t2)
+    if pos == 0
+        throw(KeyError(tag))
     end
+    pos, T = getauxtype(data, pos + 2)
+    _, val = getauxdata(data, pos, T)
+    return val
+end
 
-    if p > length(data)
-        throw(KeyError(String([t1, t2])))
+function find_tag(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
+    while pos ≤ length(data) && !(data[pos] == t1 && data[pos+1] == t2)
+        pos = next_tag_position(data, pos)
+    end
+    if pos > length(data)
+        # not found
+        return 0
     else
-        p, typ = getauxtype(data, p + 2)
-        _, value = getauxdata(data, p, typ)
-        return value
+        return pos
     end
 end
 
