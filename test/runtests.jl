@@ -24,6 +24,12 @@ end
     @test length(dict) == 0
     @test isempty(dict)
     @test_throws KeyError dict["NM"]
+
+    dict = AuxDataDict("NM" => 0x01, "XY" => Int32(100))
+    @test length(dict) == 2
+    @test !isempty(dict)
+    @test dict["NM"] === 0x01
+    @test dict["XY"] === Int32(100)
 end
 
 @testset "SAM" begin

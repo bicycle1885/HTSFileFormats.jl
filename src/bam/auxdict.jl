@@ -16,6 +16,17 @@ immutable AuxDataDict <: Associative{String,Any}
     data::Vector{UInt8}
 end
 
+function AuxDataDict{K<:AbstractString}(pairs::Pair{K}...)
+    out = IOBuffer()
+    for (tag, val) in pairs
+        checkkeytag(tag)
+        write(out, tag)
+        write(out, auxtypechar[typeof(val)])
+        write(out, val)
+    end
+    return AuxDataDict(takebuf_array(out))
+end
+
 function Base.getindex(dict::AuxDataDict, tag::AbstractString)
     checkkeytag(tag)
     return getvalue(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
