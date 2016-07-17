@@ -17,6 +17,15 @@ function rand_interval(intval)
     end
 end
 
+@testset "AuxDataDict" begin
+    AuxDataDict = HTSFileFormats.AuxDataDict
+
+    dict = AuxDataDict(UInt8[])
+    @test length(dict) == 0
+    @test isempty(dict)
+    @test_throws KeyError dict["NM"]
+end
+
 @testset "SAM" begin
     @testset "SAMHeader" begin
         h = SAMHeader()

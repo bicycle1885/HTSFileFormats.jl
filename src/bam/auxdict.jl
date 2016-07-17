@@ -52,7 +52,7 @@ end
 function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     pos = find_tag(data, pos, t1, t2)
     if pos == 0
-        throw(KeyError(tag))
+        throw(KeyError(String([t1, t2])))
     end
     pos, T = getauxtype(data, pos + 2)
     _, val = getauxdata(data, pos, T)
