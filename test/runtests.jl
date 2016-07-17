@@ -27,9 +27,13 @@ end
 
     dict = AuxDataDict("NM" => 0x01, "XY" => Int32(100))
     @test length(dict) == 2
-    @test !isempty(dict)
     @test dict["NM"] === 0x01
     @test dict["XY"] === Int32(100)
+
+    dict = AuxDataDict("NM" => 0x01, "MD" => "8T1T39")
+    @test length(dict) == 2
+    @test dict["NM"] === 0x01
+    @test dict["MD"] == "8T1T39"
 end
 
 @testset "SAM" begin

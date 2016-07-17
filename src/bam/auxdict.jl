@@ -21,8 +21,13 @@ function AuxDataDict{K<:AbstractString}(pairs::Pair{K}...)
     for (tag, val) in pairs
         checkkeytag(tag)
         write(out, tag)
-        write(out, auxtypechar[typeof(val)])
-        write(out, val)
+        T = typeof(val)
+        write(out, auxtypechar[T])
+        if T <: AbstractString
+            write(out, val, '\0')
+        else
+            write(out, val)
+        end
     end
     return AuxDataDict(takebuf_array(out))
 end
