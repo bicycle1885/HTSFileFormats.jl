@@ -173,6 +173,14 @@ end
 
         @test HTSFileFormats.rightmost_position(rec) === Int32(-1)
         @test HTSFileFormats.alignment_length(rec) === 0
+
+        rec = BAMRecord()
+        @test !haskey(rec, "MN")
+        rec["MN"] = 0x01
+        @test rec["MN"] === 0x01
+        @test haskey(rec, "MN")
+        delete!(rec, "MN")
+        @test !haskey(rec, "MN")
     end
 
     @testset "Reader" begin

@@ -240,11 +240,31 @@ function auxiliary(aln::BAMRecord)
     return AuxDataDict(aln.data[offset+1:aln.datasize])
 end
 
-function Base.getindex(aln::BAMRecord, field::AbstractString)
-    checkkeytag(field)
-    seqlen = sequence_length(aln)
-    offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2) + seqlen
-    return getvalue(aln.data, offset + 1, UInt8(field[1]), UInt8(field[2]))
+function Base.getindex(aln::BAMRecord, tag::AbstractString)
+    checkkeytag(tag)
+    return getvalue(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2]))
+end
+
+function Base.setindex!(aln::BAMRecord, val, tag::AbstractString)
+    checkkeytag(tag)
+    setvalue!(aln.data, auxdata_position(aln), val, UInt8(tag[1]), UInt8(tag[2]))
+    return aln
+end
+
+function Base.delete!(aln::BAMRecord, tag::AbstractString)
+    checkkeytag(tag)
+    deletevalue!(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2]))
+    return aln
+end
+
+function Base.haskey(aln::BAMRecord, tag::AbstractString)
+    checkkeytag(tag)
+    return findtag(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2])) > 0
+end
+
+function auxdata_position(rec)
+    seqlen = sequence_length(rec)
+    return seqname_length(rec) + n_cigar_op(rec) * 4 + cld(seqlen, 2) + seqlen + 1
 end
 
 # Return the right-most position of alignment.
