@@ -159,7 +159,6 @@ end
         @test refname(rec) == "*"
         @test refid(rec) == 0
         @test position(rec) == 0
-        @test bin(rec) == 0
         @test mapping_quality(rec) == 0
         @test flag(rec) == 0
         @test next_refname(rec) == "*"

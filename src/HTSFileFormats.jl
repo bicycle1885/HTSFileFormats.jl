@@ -15,7 +15,6 @@ export
     next_refid,
     position,
     next_position,
-    bin,
     mapping_quality,
     flag,
     template_length,

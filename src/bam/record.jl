@@ -49,7 +49,6 @@ function Base.show(io::IO, rec::BAMRecord)
     println(io, "next reference name: ", next_refname(rec))
     println(io, "position: ", position(rec))
     println(io, "next position: ", next_position(rec))
-    println(io, "bin: ", bin(rec))
     println(io, "mapping quality: ", mapping_quality(rec))
     println(io, "flag: ", flag(rec))
     println(io, "template length: ", template_length(rec))
@@ -125,15 +124,6 @@ end
 
 function next_position(rec::BAMRecord)
     return rec.next_pos + 1
-end
-
-"""
-    bin(rec::BAMRecord)
-
-Return the bin of the alignment `rec`.
-"""
-function Base.bin(rec::BAMRecord)
-    return UInt16(rec.bin_mq_nl >> 16)
 end
 
 """
