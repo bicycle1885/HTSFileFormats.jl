@@ -12,7 +12,7 @@
 #   data: |tag (2 bytes)|value type (1 byte)|value (variable)|tag|...
 #
 # Note that tag = 0xffff indicates the value must be skipped because it is outdated.
-immutable AuxDataDict <: Associative{String}
+immutable AuxDataDict <: Associative{String,Any}
     data::Vector{UInt8}
 end
 
@@ -43,10 +43,6 @@ function Base.setindex!(dict::AuxDataDict, val, tag::AbstractString)
     return dict
 end
 
-function Base.eltype(::Type{AuxDataDict})
-    return Pair{String}
-end
-
 function Base.length(dict::AuxDataDict)
     return count_auxtags(dict.data, 1)
 end
@@ -69,7 +65,7 @@ function Base.next(dict::AuxDataDict, pos)
     if t1 == t2 == 0xff
         @goto doit
     end
-    return (String([t1, t2]) => value), pos
+    return Pair{String,Any}(String([t1, t2]), value), pos
 end
 
 
