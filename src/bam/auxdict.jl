@@ -96,16 +96,10 @@ function setvalue!(data::Vector{UInt8}, pos::Int, val, t1::UInt8, t2::UInt8)
     else
         resize!(data, length(data) + 2 + 1 + sizeof(val))
     end
-    T = typeof(val)
     data[pos+1] = t1
     data[pos+2] = t2
-    data[pos+3] = UInt8(auxtypechar[T])
-    if isa(val, AbstractString)
-        ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, pos + 4), pointer(val), length(val))
-        data[end] = 0x00
-    else
-        unsafe_store!(Ptr{T}(pointer(data, pos + 4)), val)
-    end
+    storeauxtype!(data, pos + 3, typeof(val))
+    storeauxvalue!(data, pos + 4, val)
     return data
 end
 
@@ -152,6 +146,22 @@ function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{String})
                    dataptr, '\0', length(data) - p + 1)
     q::Int = p + (endptr - dataptr) - 1
     return q + 2, String(data[p:q])
+end
+
+function storeauxtype!(data::Vector{UInt8}, p::Int, T)
+    data[p] = UInt8(auxtypechar[T])
+    return data
+end
+
+function storeauxvalue!(data::Vector{UInt8}, p::Int, val)
+    if isa(val, AbstractString)
+        n = length(val)
+        ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, p), pointer(val), n)
+        data[p + n] = 0x00
+    else
+        unsafe_store!(Ptr{eltype(val)}(pointer(data, p)), val)
+    end
+    return data
 end
 
 function count_auxtags(data::Vector{UInt8}, p::Int)
