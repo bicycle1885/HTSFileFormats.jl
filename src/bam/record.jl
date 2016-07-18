@@ -46,12 +46,12 @@ end
 function Base.show(io::IO, rec::BAMRecord)
     println(summary(rec), ":")
     println(io, "reference name: ", refname(rec))
-    println(io, "next reference name: ", next_refname(rec))
+    println(io, "next reference name: ", nextrefname(rec))
     println(io, "position: ", position(rec))
-    println(io, "next position: ", next_position(rec))
-    println(io, "mapping quality: ", mapping_quality(rec))
+    println(io, "next position: ", nextposition(rec))
+    println(io, "mapping quality: ", mappingquality(rec))
     println(io, "flag: ", flag(rec))
-    println(io, "template length: ", template_length(rec))
+    println(io, "template length: ", templatelength(rec))
     println(io, "sequence name: ", seqname(rec))
     println(io, "CIGAR string: ", cigar(rec))
     println(io, "sequence: ", sequence(rec))
@@ -82,7 +82,7 @@ function refid(rec::BAMRecord)
     return rec.refid + 1
 end
 
-function next_refid(rec::BAMRecord)
+function nextrefid(rec::BAMRecord)
     return rec.next_refid + 1
 end
 
@@ -102,8 +102,8 @@ function refname(r::BAMRecord)
     end
 end
 
-function next_refname(r::BAMRecord)
-    id = next_refid(r)
+function nextrefname(r::BAMRecord)
+    id = nextrefid(r)
     if id == 0
         return "*"
     else
@@ -122,16 +122,16 @@ function Base.position(rec::BAMRecord)
     return rec.pos + 1
 end
 
-function next_position(rec::BAMRecord)
+function nextposition(rec::BAMRecord)
     return rec.next_pos + 1
 end
 
 """
-    mapping_quality(rec::BAMRecord)
+    mappingquality(rec::BAMRecord)
 
 Return the mapping quality of the alignment `rec`.
 """
-function mapping_quality(rec::BAMRecord)
+function mappingquality(rec::BAMRecord)
     return UInt8((rec.bin_mq_nl >> 8) & 0xff)
 end
 
@@ -145,11 +145,11 @@ function flag(rec::BAMRecord)
 end
 
 """
-    template_length(rec::BAMRecord)
+    templatelength(rec::BAMRecord)
 
 Return the template length of the alignment `rec`.
 """
-function template_length(rec::BAMRecord)
+function templatelength(rec::BAMRecord)
     return rec.tlen
 end
 

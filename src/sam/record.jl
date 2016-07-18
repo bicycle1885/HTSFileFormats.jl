@@ -23,12 +23,12 @@ end
 function Base.show(io::IO, rec::SAMRecord)
     println(summary(rec), ':')
     println(io, "reference name: ", refname(rec))
-    println(io, "next reference name: ", next_refname(rec))
+    println(io, "next reference name: ", nextrefname(rec))
     println(io, "position: ", position(rec))
-    println(io, "next position: ", next_position(rec))
-    println(io, "mapping quality: ", mapping_quality(rec))
+    println(io, "next position: ", nextposition(rec))
+    println(io, "mapping quality: ", mappingquality(rec))
     println(io, "flag: ", flag(rec))
-    println(io, "template length: ", template_length(rec))
+    println(io, "template length: ", templatelength(rec))
     println(io, "sequence name: ", seqname(rec))
     println(io, "CIGAR string: ", cigar(rec))
     println(io, "sequence: ", sequence(rec))
@@ -56,7 +56,7 @@ function refname(r::SAMRecord)
     return r.refname
 end
 
-function next_refname(r::SAMRecord)
+function nextrefname(r::SAMRecord)
     return r.next_refname
 end
 
@@ -64,15 +64,15 @@ function Base.position(r::SAMRecord)
     return r.pos
 end
 
-function next_position(r::SAMRecord)
+function nextposition(r::SAMRecord)
     return r.next_pos
 end
 
-function mapping_quality(r::SAMRecord)
+function mappingquality(r::SAMRecord)
     return r.mapq
 end
 
-function template_length(r::SAMRecord)
+function templatelength(r::SAMRecord)
     return r.tlen
 end
 

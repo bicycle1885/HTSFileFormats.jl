@@ -95,10 +95,10 @@ end
         @test seqname(rec) == ""
         @test flag(rec) == 0x0000
         @test refname(rec) == "*"
-        @test next_refname(rec) == "*"
+        @test nextrefname(rec) == "*"
         @test position(rec) == 0
-        @test next_position(rec) == 0
-        @test template_length(rec) == 0
+        @test nextposition(rec) == 0
+        @test templatelength(rec) == 0
         @test cigar(rec) == "*"
         @test sequence(rec) == dna""
         @test qualities(rec) == UInt8[]
@@ -159,12 +159,12 @@ end
         @test refname(rec) == "*"
         @test refid(rec) == 0
         @test position(rec) == 0
-        @test mapping_quality(rec) == 0
+        @test mappingquality(rec) == 0
         @test flag(rec) == 0
-        @test next_refname(rec) == "*"
-        @test next_refid(rec) == 0
-        @test next_position(rec) == 0
-        @test template_length(rec) == 0
+        @test nextrefname(rec) == "*"
+        @test nextrefid(rec) == 0
+        @test nextposition(rec) == 0
+        @test templatelength(rec) == 0
         @test seqname(rec) == ""
         @test cigar(rec) == ""
         @test sequence(rec) == dna""
