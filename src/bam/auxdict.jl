@@ -60,8 +60,8 @@ function Base.next(dict::AuxDataDict, pos)
     @label doit
     t1 = data[pos]
     t2 = data[pos+1]
-    pos, typ = getauxtype(data, pos + 2)
-    pos, value = getauxdata(data, pos, typ)
+    pos, typ = loadauxtype(data, pos + 2)
+    pos, value = loadauxvalue(data, pos, typ)
     if t1 == t2 == 0xff
         @goto doit
     end
@@ -77,8 +77,8 @@ function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     if pos == 0
         throw(KeyError(String([t1, t2])))
     end
-    pos, T = getauxtype(data, pos + 2)
-    _, val = getauxdata(data, pos, T)
+    pos, T = loadauxtype(data, pos + 2)
+    _, val = loadauxvalue(data, pos, T)
     return val
 end
 
@@ -121,7 +121,7 @@ function find_tag(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     end
 end
 
-function getauxtype(data::Vector{UInt8}, p::Int)
+function loadauxtype(data::Vector{UInt8}, p::Int)
     t = data[p]
     if t == UInt8('B')
         return p + 2, Vector{auxtype[data[p+1]]}
@@ -130,15 +130,15 @@ function getauxtype(data::Vector{UInt8}, p::Int)
     end
 end
 
-function getauxdata{T}(data::Vector{UInt8}, p::Int, ::Type{T})
+function loadauxvalue{T}(data::Vector{UInt8}, p::Int, ::Type{T})
     return p + sizeof(T), unsafe_load(Ptr{T}(pointer(data, p)))
 end
 
-function getauxdata(data::Vector{UInt8}, p::Int, ::Type{Char})
+function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{Char})
     return p + 1, Char(unsafe_load(pointer(data, p)))
 end
 
-function getauxdata{T}(data::Vector{UInt8}, p::Int, ::Type{Vector{T}})
+function loadauxvalue{T}(data::Vector{UInt8}, p::Int, ::Type{Vector{T}})
     n = unsafe_load(Ptr{Int32}(pointer(data, p)))
     p += 4
     xs = Array(T, n)
@@ -146,7 +146,7 @@ function getauxdata{T}(data::Vector{UInt8}, p::Int, ::Type{Vector{T}})
     return p + n * sizeof(T), xs
 end
 
-function getauxdata(data::Vector{UInt8}, p::Int, ::Type{String})
+function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{String})
     dataptr = pointer(data, p)
     endptr = ccall(:memchr, Ptr{Void}, (Ptr{Void}, Cint, Csize_t),
                    dataptr, '\0', length(data) - p + 1)
