@@ -57,7 +57,7 @@ function Base.show(io::IO, rec::BAMRecord)
     println(io, "CIGAR string: ", cigar(rec))
     println(io, "sequence: ", sequence(rec))
     println(io, "base qualities: ", qualities(rec))
-      print(io, "auxiliary: ", auxiliary(rec))
+      print(io, "optional fields: ", optinal_fields(rec))
 end
 
 # the data size of fixed-length fields (.refid-.tlen)
@@ -225,17 +225,6 @@ function qualities(rec::BAMRecord)
     return [rec.data[i+offset] for i in 1:seqlen]
 end
 
-"""
-    auxiliary(rec::BAMRecord)
-
-Return a auxiliary data dictionary of the alignment `rec`.
-"""
-function auxiliary(rec::BAMRecord)
-    seqlen = sequence_length(rec)
-    offset = seqname_length(rec) + n_cigar_op(rec) * 4 + cld(seqlen, 2) + seqlen
-    return AuxDataDict(rec.data[offset+1:rec.datasize])
-end
-
 function Base.getindex(rec::BAMRecord, tag::AbstractString)
     checkkeytag(tag)
     return getvalue(rec.data, auxdata_position(rec), UInt8(tag[1]), UInt8(tag[2]))
@@ -256,6 +245,10 @@ end
 function Base.haskey(rec::BAMRecord, tag::AbstractString)
     checkkeytag(tag)
     return findtag(rec.data, auxdata_position(rec), UInt8(tag[1]), UInt8(tag[2])) > 0
+end
+
+function optinal_fields(rec::BAMRecord)
+    return AuxDataDict(rec.data[auxdata_position(rec):rec.datasize])
 end
 
 function auxdata_position(rec)
