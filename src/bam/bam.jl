@@ -10,7 +10,6 @@ The BAM file format.
 """
 immutable BAM <: Bio.IO.FileFormat end
 
-include("chunk.jl")
 include("bai.jl")
 include("record.jl")
 include("reader.jl")

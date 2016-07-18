@@ -46,6 +46,7 @@ import BGZFStreams: BGZFStream, VirtualOffset, virtualoffset
 import BufferedStreams   # this is necessary though I don't know why.
 import BufferedStreams: BufferedInputStream
 
+include("chunk.jl")
 include("sam/sam.jl")
 include("bam/bam.jl")
 include("tabix/tabix.jl")
