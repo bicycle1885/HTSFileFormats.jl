@@ -82,7 +82,7 @@ end
 # ---------
 
 function getvalue(data, pos, t1, t2)
-    pos = find_tag(data, pos, t1, t2)
+    pos = findtag(data, pos, t1, t2)
     if pos == 0
         throw(KeyError(String([t1, t2])))
     end
@@ -92,7 +92,7 @@ function getvalue(data, pos, t1, t2)
 end
 
 function setvalue!(data, pos, val, t1, t2)
-    pos = find_tag(data, pos, t1, t2)
+    pos = findtag(data, pos, t1, t2)
     if pos > 0
         # cancel tag
         data[pos] = data[pos+1] = 0xff
@@ -112,7 +112,7 @@ function setvalue!(data, pos, val, t1, t2)
     return data
 end
 
-function find_tag(data, pos, t1, t2)
+function findtag(data, pos, t1, t2)
     while pos ≤ length(data) && !(data[pos] == t1 && data[pos+1] == t2)
         pos = next_tag_position(data, pos)
     end
