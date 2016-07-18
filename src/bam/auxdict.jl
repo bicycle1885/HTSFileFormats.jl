@@ -39,6 +39,12 @@ function Base.setindex!(dict::AuxDataDict, val, tag::AbstractString)
     return dict
 end
 
+function Base.delete!(dict::AuxDataDict, tag::AbstractString)
+    checkkeytag(tag)
+    deletevalue!(dict.data, 1, UInt8(tag[1]), UInt8(tag[2]))
+    return dict
+end
+
 function Base.length(dict::AuxDataDict)
     data = dict.data
     p = 1
@@ -105,6 +111,15 @@ function setvalue!(data, pos, val, t1, t2)
     data[pos+2] = t2
     storeauxtype!(data, pos + 3, typeof(val))
     storeauxvalue!(data, pos + 4, val)
+    return data
+end
+
+function deletevalue!(data, pos, t1, t2)
+    pos = findtag(data, pos, t1, t2)
+    if pos > 0
+        # cancel tag
+        data[pos] = data[pos+1] = 0xff
+    end
     return data
 end
 

@@ -68,6 +68,9 @@ end
     dict["XY"] = "foobar"
     @test dict["XY"] == "foobar"
     @test collect(dict) == ["NM" => 0x00, "MD" => "50", "XY" => "foobar"]
+    delete!(dict, "NM")
+    @test length(dict) == 2
+    @test collect(dict) == ["MD" => "50", "XY" => "foobar"]
 end
 
 @testset "SAM" begin
