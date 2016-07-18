@@ -25,6 +25,30 @@ end
     @test isempty(dict)
     @test_throws KeyError dict["NM"]
 
+    dict = AuxDataDict(
+        "X1" => UInt8(1),
+        "X2" => UInt16(2),
+        "X3" => UInt32(3),
+        "X4" => Int8(4),
+        "X5" => Int16(5),
+        "X6" => Int32(6),
+        "X7" => Float32(7),
+        "X8" => "eight",
+        "X9" => Int32[9])
+    @test length(dict) == 9
+    @test !isempty(dict)
+    @test dict["X1"] === UInt8(1)
+    @test dict["X2"] === UInt16(2)
+    @test dict["X3"] === UInt32(3)
+    @test dict["X4"] === Int8(4)
+    @test dict["X5"] === Int16(5)
+    @test dict["X6"] === Int32(6)
+    @test dict["X7"] === Float32(7)
+    @test dict["X8"] == "eight"
+    @test typeof(dict["X8"]) == String
+    @test dict["X9"] == Int32[9]
+    @test typeof(dict["X9"]) == Vector{Int32}
+
     dict = AuxDataDict("NM" => 0x01, "XY" => Int32(100), "XZ" => [0x11, 0x23])
     @test length(dict) == 3
     @test dict["NM"] === 0x01
