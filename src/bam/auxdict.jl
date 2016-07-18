@@ -17,19 +17,11 @@ immutable AuxDataDict <: Associative{String,Any}
 end
 
 function AuxDataDict{K<:AbstractString}(pairs::Pair{K}...)
-    out = IOBuffer()
+    dict = AuxDataDict(UInt8[])
     for (tag, val) in pairs
-        checkkeytag(tag)
-        write(out, tag)
-        T = typeof(val)
-        write(out, auxtypechar[T])
-        if T <: AbstractString
-            write(out, val, '\0')
-        else
-            write(out, val)
-        end
+        dict[tag] = val
     end
-    return AuxDataDict(takebuf_array(out))
+    return dict
 end
 
 function Base.getindex(dict::AuxDataDict, tag::AbstractString)
@@ -158,7 +150,11 @@ function loadauxvalue(data, p, ::Type{String})
 end
 
 function storeauxtype!(data, p, T)
-    data[p] = UInt8(auxtypechar[T])
+    if T <: AbstractVector
+        data[p] = UInt8('B')
+    else
+        data[p] = UInt8(auxtypechar[T])
+    end
     return data
 end
 
@@ -167,6 +163,11 @@ function storeauxvalue!(data, p, val)
         n = length(val)
         ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, p), pointer(val), n)
         data[p + n] = 0x00
+    elseif isa(val, AbstractVector)
+        n = length(val)
+        storeauxtype!(data, p, eltype(val))
+        unsafe_store!(Ptr{UInt32}(pointer(data, p + 1)), n)
+        ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, p + 5), pointer(val), n)
     else
         unsafe_store!(Ptr{eltype(val)}(pointer(data, p)), val)
     end

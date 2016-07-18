@@ -25,10 +25,12 @@ end
     @test isempty(dict)
     @test_throws KeyError dict["NM"]
 
-    dict = AuxDataDict("NM" => 0x01, "XY" => Int32(100))
-    @test length(dict) == 2
+    dict = AuxDataDict("NM" => 0x01, "XY" => Int32(100), "XZ" => [0x11, 0x23])
+    @test length(dict) == 3
     @test dict["NM"] === 0x01
     @test dict["XY"] === Int32(100)
+    @test dict["XZ"] == [0x11, 0x23]
+    @test eltype(dict["XZ"]) == UInt8
 
     dict = AuxDataDict("NM" => 0x01, "MD" => "8T1T39")
     @test length(dict) == 2
