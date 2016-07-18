@@ -73,18 +73,18 @@ function ismapped(rec::BAMRecord)
 end
 
 """
-    refid(aln::BAMRecord)
+    refid(rec::BAMRecord)
 
-Return the index of a reference sequence that `aln` is mapped onto.
+Return the index of a reference sequence that `rec` is mapped onto.
 
 The index is 1-based and will be 0 for an alignment without mapping position.
 """
-function refid(aln::BAMRecord)
-    return aln.refid + 1
+function refid(rec::BAMRecord)
+    return rec.refid + 1
 end
 
-function next_refid(aln::BAMRecord)
-    return aln.next_refid + 1
+function next_refid(rec::BAMRecord)
+    return rec.next_refid + 1
 end
 
 """
@@ -113,81 +113,81 @@ function next_refname(r::BAMRecord)
 end
 
 """
-    position(aln::BAMRecord)
+    position(rec::BAMRecord)
 
 Return the position of a mapped read.
 
 The index is 1-based and will be 0 for an alignment without mapping position.
 """
-function Base.position(aln::BAMRecord)
-    return aln.pos + 1
+function Base.position(rec::BAMRecord)
+    return rec.pos + 1
 end
 
-function next_position(aln::BAMRecord)
-    return aln.next_pos + 1
-end
-
-"""
-    bin(aln::BAMRecord)
-
-Return the bin of the alignment `aln`.
-"""
-function Base.bin(aln::BAMRecord)
-    return UInt16(aln.bin_mq_nl >> 16)
+function next_position(rec::BAMRecord)
+    return rec.next_pos + 1
 end
 
 """
-    mapping_quality(aln::BAMRecord)
+    bin(rec::BAMRecord)
 
-Return the mapping quality of the alignment `aln`.
+Return the bin of the alignment `rec`.
 """
-function mapping_quality(aln::BAMRecord)
-    return UInt8((aln.bin_mq_nl >> 8) & 0xff)
+function Base.bin(rec::BAMRecord)
+    return UInt16(rec.bin_mq_nl >> 16)
 end
 
 """
-    flag(aln::BAMRecord)
+    mapping_quality(rec::BAMRecord)
 
-Return the flag of the alignment `aln`.
+Return the mapping quality of the alignment `rec`.
 """
-function flag(aln::BAMRecord)
-    return UInt16(aln.flag_nc >> 16)
+function mapping_quality(rec::BAMRecord)
+    return UInt8((rec.bin_mq_nl >> 8) & 0xff)
 end
 
 """
-    template_length(aln::BAMRecord)
+    flag(rec::BAMRecord)
 
-Return the template length of the alignment `aln`.
+Return the flag of the alignment `rec`.
 """
-function template_length(aln::BAMRecord)
-    return aln.tlen
+function flag(rec::BAMRecord)
+    return UInt16(rec.flag_nc >> 16)
 end
 
 """
-    seqname(aln::BAMRecord)
+    template_length(rec::BAMRecord)
 
-Return the read name of the alignment `aln`.
+Return the template length of the alignment `rec`.
 """
-function seqname(aln::BAMRecord)
+function template_length(rec::BAMRecord)
+    return rec.tlen
+end
+
+"""
+    seqname(rec::BAMRecord)
+
+Return the read name of the alignment `rec`.
+"""
+function seqname(rec::BAMRecord)
     # drop the last NUL character
-    return unsafe_string(pointer(aln.data), max(seqname_length(aln) - 1, 0))
+    return unsafe_string(pointer(rec.data), max(seqname_length(rec) - 1, 0))
 end
 
 """
-    cigar_rle(aln::BAMRecord)
+    cigar_rle(rec::BAMRecord)
 
 Return a run-length encoded tuple `(ops, lens)` of the CIGAR string.
 See also `cigar`.
 """
-function cigar_rle(aln::BAMRecord)
-    offset = seqname_length(aln)
+function cigar_rle(rec::BAMRecord)
+    offset = seqname_length(rec)
     ops = Bio.Align.Operation[]
     lens = Int[]
-    for i in offset+1:4:offset+n_cigar_op(aln)*4
-        x = UInt32(aln.data[i])         |
-            UInt32(aln.data[i+1]) <<  8 |
-            UInt32(aln.data[i+2]) << 16 |
-            UInt32(aln.data[i+3]) << 24
+    for i in offset+1:4:offset+n_cigar_op(rec)*4
+        x = UInt32(rec.data[i])         |
+            UInt32(rec.data[i+1]) <<  8 |
+            UInt32(rec.data[i+2]) << 16 |
+            UInt32(rec.data[i+3]) << 24
         op = Bio.Align.Operation(x & 0x0f)
         len = x >> 4
         push!(ops, op)
@@ -197,69 +197,69 @@ function cigar_rle(aln::BAMRecord)
 end
 
 """
-    cigar(aln::BAMRecord)
+    cigar(rec::BAMRecord)
 
-Return a CIGAR string of the alignment `aln`. See also `cigar_rle`.
+Return a CIGAR string of the alignment `rec`. See also `cigar_rle`.
 """
-function cigar(aln::BAMRecord)
+function cigar(rec::BAMRecord)
     buf = IOBuffer()
-    for (op, len) in zip(cigar_rle(aln)...)
+    for (op, len) in zip(cigar_rle(rec)...)
         print(buf, len, Char(op))
     end
     return takebuf_string(buf)
 end
 
 """
-    sequence(aln::BAMRecord)
+    sequence(rec::BAMRecord)
 
-Return a DNA sequence of the alignment `aln`.
+Return a DNA sequence of the alignment `rec`.
 """
-function sequence(aln::BAMRecord)
-    return decode_bamseq!(Bio.Seq.DNASequence(sequence_length(aln)), aln)
+function sequence(rec::BAMRecord)
+    return decode_bamseq!(Bio.Seq.DNASequence(sequence_length(rec)), rec)
 end
 
 """
-    qualities(aln::BAMRecord)
+    qualities(rec::BAMRecord)
 
-Return base qualities of the alignment `aln`.
+Return base qualities of the alignment `rec`.
 """
-function qualities(aln::BAMRecord)
-    seqlen = sequence_length(aln)
-    offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2)
-    return [aln.data[i+offset] for i in 1:seqlen]
+function qualities(rec::BAMRecord)
+    seqlen = sequence_length(rec)
+    offset = seqname_length(rec) + n_cigar_op(rec) * 4 + cld(seqlen, 2)
+    return [rec.data[i+offset] for i in 1:seqlen]
 end
 
 """
-    auxiliary(aln::BAMRecord)
+    auxiliary(rec::BAMRecord)
 
-Return a auxiliary data dictionary of the alignment `aln`.
+Return a auxiliary data dictionary of the alignment `rec`.
 """
-function auxiliary(aln::BAMRecord)
-    seqlen = sequence_length(aln)
-    offset = seqname_length(aln) + n_cigar_op(aln) * 4 + cld(seqlen, 2) + seqlen
-    return AuxDataDict(aln.data[offset+1:aln.datasize])
+function auxiliary(rec::BAMRecord)
+    seqlen = sequence_length(rec)
+    offset = seqname_length(rec) + n_cigar_op(rec) * 4 + cld(seqlen, 2) + seqlen
+    return AuxDataDict(rec.data[offset+1:rec.datasize])
 end
 
-function Base.getindex(aln::BAMRecord, tag::AbstractString)
+function Base.getindex(rec::BAMRecord, tag::AbstractString)
     checkkeytag(tag)
-    return getvalue(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2]))
+    return getvalue(rec.data, auxdata_position(rec), UInt8(tag[1]), UInt8(tag[2]))
 end
 
-function Base.setindex!(aln::BAMRecord, val, tag::AbstractString)
+function Base.setindex!(rec::BAMRecord, val, tag::AbstractString)
     checkkeytag(tag)
-    setvalue!(aln.data, auxdata_position(aln), val, UInt8(tag[1]), UInt8(tag[2]))
-    return aln
+    setvalue!(rec.data, auxdata_position(rec), val, UInt8(tag[1]), UInt8(tag[2]))
+    return rec
 end
 
-function Base.delete!(aln::BAMRecord, tag::AbstractString)
+function Base.delete!(rec::BAMRecord, tag::AbstractString)
     checkkeytag(tag)
-    deletevalue!(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2]))
-    return aln
+    deletevalue!(rec.data, auxdata_position(rec), UInt8(tag[1]), UInt8(tag[2]))
+    return rec
 end
 
-function Base.haskey(aln::BAMRecord, tag::AbstractString)
+function Base.haskey(rec::BAMRecord, tag::AbstractString)
     checkkeytag(tag)
-    return findtag(aln.data, auxdata_position(aln), UInt8(tag[1]), UInt8(tag[2])) > 0
+    return findtag(rec.data, auxdata_position(rec), UInt8(tag[1]), UInt8(tag[2])) > 0
 end
 
 function auxdata_position(rec)
@@ -287,18 +287,18 @@ function alignment_length(rec::BAMRecord)
 end
 
 # Return the length of the read name.
-function seqname_length(aln)
-    return aln.bin_mq_nl & 0xff
+function seqname_length(rec)
+    return rec.bin_mq_nl & 0xff
 end
 
 # Return the number of CIGAR operations.
-function n_cigar_op(aln)
-    return aln.flag_nc & 0xffff
+function n_cigar_op(rec)
+    return rec.flag_nc & 0xffff
 end
 
 # Return the length of the DNA sequence.
-function sequence_length(aln)
-    return aln.l_seq
+function sequence_length(rec)
+    return rec.l_seq
 end
 
 # "=ACMGRSVTWYHKDBN" -> [0,16)
@@ -310,21 +310,21 @@ const bam_nucs = [
 ]
 
 # Decode the DNA sequence in a BAM alignment into a DNASequence.
-function decode_bamseq!(seq, aln)
-    seqlen = sequence_length(aln)
+function decode_bamseq!(seq, rec)
+    seqlen = sequence_length(rec)
     @assert length(seq) == seqlen
 
     i = 2
-    j = seqname_length(aln) + n_cigar_op(aln) * 4 + 1
+    j = seqname_length(rec) + n_cigar_op(rec) * 4 + 1
     while i ≤ seqlen
-        x = aln.data[j]
+        x = rec.data[j]
         seq[i-1] = bam_nucs[(x >> 4) + 1]
         seq[i  ] = bam_nucs[(x & 0x0f) + 1]
         i += 2
         j += 1
     end
     if isodd(seqlen)
-        x = aln.data[j]
+        x = rec.data[j]
         seq[i-1] = bam_nucs[(x >> 4) + 1]
     end
 
