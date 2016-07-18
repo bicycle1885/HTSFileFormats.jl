@@ -184,14 +184,10 @@ function cigar_rle(rec::BAMRecord)
     ops = Bio.Align.Operation[]
     lens = Int[]
     for i in offset+1:4:offset+n_cigar_op(rec)*4
-        x = UInt32(rec.data[i])         |
-            UInt32(rec.data[i+1]) <<  8 |
-            UInt32(rec.data[i+2]) << 16 |
-            UInt32(rec.data[i+3]) << 24
+        x = unsafe_load(Ptr{UInt32}(pointer(rec.data, i)))
         op = Bio.Align.Operation(x & 0x0f)
-        len = x >> 4
         push!(ops, op)
-        push!(lens, len)
+        push!(lens, x >> 4)
     end
     return ops, lens
 end
