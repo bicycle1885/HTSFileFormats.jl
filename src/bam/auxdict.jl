@@ -44,7 +44,16 @@ function Base.setindex!(dict::AuxDataDict, val, tag::AbstractString)
 end
 
 function Base.length(dict::AuxDataDict)
-    return count_auxtags(dict.data, 1)
+    data = dict.data
+    p = 1
+    len = 0
+    while p ≤ length(data)
+        if !(data[p] == data[p+1] == 0xff)
+            len += 1
+        end
+        p = next_tag_position(data, p)
+    end
+    return len
 end
 
 function Base.start(dict::AuxDataDict)
@@ -72,7 +81,7 @@ end
 # Internals
 # ---------
 
-function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
+function getvalue(data, pos, t1, t2)
     pos = find_tag(data, pos, t1, t2)
     if pos == 0
         throw(KeyError(String([t1, t2])))
@@ -82,7 +91,7 @@ function getvalue(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     return val
 end
 
-function setvalue!(data::Vector{UInt8}, pos::Int, val, t1::UInt8, t2::UInt8)
+function setvalue!(data, pos, val, t1, t2)
     pos = find_tag(data, pos, t1, t2)
     if pos > 0
         # cancel tag
@@ -103,7 +112,7 @@ function setvalue!(data::Vector{UInt8}, pos::Int, val, t1::UInt8, t2::UInt8)
     return data
 end
 
-function find_tag(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
+function find_tag(data, pos, t1, t2)
     while pos ≤ length(data) && !(data[pos] == t1 && data[pos+1] == t2)
         pos = next_tag_position(data, pos)
     end
@@ -115,7 +124,7 @@ function find_tag(data::Vector{UInt8}, pos::Int, t1::UInt8, t2::UInt8)
     end
 end
 
-function loadauxtype(data::Vector{UInt8}, p::Int)
+function loadauxtype(data, p)
     t = data[p]
     if t == UInt8('B')
         return p + 2, Vector{auxtype[data[p+1]]}
@@ -124,15 +133,15 @@ function loadauxtype(data::Vector{UInt8}, p::Int)
     end
 end
 
-function loadauxvalue{T}(data::Vector{UInt8}, p::Int, ::Type{T})
+function loadauxvalue{T}(data, p, ::Type{T})
     return p + sizeof(T), unsafe_load(Ptr{T}(pointer(data, p)))
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{Char})
+function loadauxvalue(data, p, ::Type{Char})
     return p + 1, Char(unsafe_load(pointer(data, p)))
 end
 
-function loadauxvalue{T}(data::Vector{UInt8}, p::Int, ::Type{Vector{T}})
+function loadauxvalue{T}(data, p, ::Type{Vector{T}})
     n = unsafe_load(Ptr{Int32}(pointer(data, p)))
     p += 4
     xs = Array(T, n)
@@ -140,7 +149,7 @@ function loadauxvalue{T}(data::Vector{UInt8}, p::Int, ::Type{Vector{T}})
     return p + n * sizeof(T), xs
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{String})
+function loadauxvalue(data, p, ::Type{String})
     dataptr = pointer(data, p)
     endptr = ccall(:memchr, Ptr{Void}, (Ptr{Void}, Cint, Csize_t),
                    dataptr, '\0', length(data) - p + 1)
@@ -148,12 +157,12 @@ function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{String})
     return q + 2, String(data[p:q])
 end
 
-function storeauxtype!(data::Vector{UInt8}, p::Int, T)
+function storeauxtype!(data, p, T)
     data[p] = UInt8(auxtypechar[T])
     return data
 end
 
-function storeauxvalue!(data::Vector{UInt8}, p::Int, val)
+function storeauxvalue!(data, p, val)
     if isa(val, AbstractString)
         n = length(val)
         ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Csize_t), pointer(data, p), pointer(val), n)
@@ -164,20 +173,9 @@ function storeauxvalue!(data::Vector{UInt8}, p::Int, val)
     return data
 end
 
-function count_auxtags(data::Vector{UInt8}, p::Int)
-    count = 0
-    while p ≤ length(data)
-        if !(data[p] == data[p+1] == 0xff)
-            count += 1
-        end
-        p = next_tag_position(data, p)
-    end
-    return count
-end
-
 # Find the starting position of a next tag in `data` after `p`.
 # `(data[p], data[p+1])` is supposed to be a current tag.
-function next_tag_position(data::Vector{UInt8}, p::Int)
+function next_tag_position(data, p)
     typ = Char(data[p+2])
     p += 3
     if typ == 'A'
