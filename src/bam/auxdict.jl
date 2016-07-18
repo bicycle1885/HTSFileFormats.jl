@@ -16,8 +16,12 @@ immutable AuxDataDict <: Associative{String,Any}
     data::Vector{UInt8}
 end
 
+function AuxDataDict()
+    return AuxDataDict(UInt8[])
+end
+
 function AuxDataDict{K<:AbstractString}(pairs::Pair{K}...)
-    dict = AuxDataDict(UInt8[])
+    dict = AuxDataDict()
     for (tag, val) in pairs
         dict[tag] = val
     end

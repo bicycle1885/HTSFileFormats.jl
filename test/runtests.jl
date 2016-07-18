@@ -20,7 +20,7 @@ end
 @testset "AuxDataDict" begin
     AuxDataDict = HTSFileFormats.AuxDataDict
 
-    dict = AuxDataDict(UInt8[])
+    dict = AuxDataDict()
     @test length(dict) == 0
     @test isempty(dict)
     @test_throws KeyError dict["NM"]
