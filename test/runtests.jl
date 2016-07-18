@@ -184,6 +184,9 @@ end
 
     @testset "Reader" begin
         reader = open(testfile("bam1.bam"), BAM)
+        h = header(reader)
+        @test h["SQ"] == [Dict("SN" => "1", "LN" => "239940")]
+        @test h["PG"] == [Dict("ID" => "bwa", "PN" => "bwa", "VN" => "0.6.2-r126")]
         @test isa(reader, HTSFileFormats.BAMReader)
         n = 0
         aln = BAMRecord()
