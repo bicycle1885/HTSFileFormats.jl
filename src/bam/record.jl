@@ -201,7 +201,15 @@ end
 Return a DNA sequence of the alignment `rec`.
 """
 function sequence(rec::BAMRecord)
-    return decode_bamseq!(Bio.Seq.DNASequence(sequence_length(rec)), rec)
+    seqlen = sequence_length(rec)
+    data = Vector{UInt64}(cld(seqlen, 16))
+    src::Ptr{UInt64} = pointer(rec.data, seqname_length(rec) + n_cigar_op(rec) * 4 + 1)
+    for i in 1:endof(data)
+        # copy data flipping high and low nybble
+        x = unsafe_load(src, i)
+        data[i] = (x & 0x0f0f0f0f0f0f0f0f) << 4 | (x & 0xf0f0f0f0f0f0f0f0) >> 4
+    end
+    return Bio.Seq.DNASequence(data, 1:seqlen, false)
 end
 
 """
@@ -278,34 +286,4 @@ end
 # Return the length of the DNA sequence.
 function sequence_length(rec)
     return rec.l_seq
-end
-
-# "=ACMGRSVTWYHKDBN" -> [0,16)
-const bam_nucs = [
-    Bio.Seq.DNA_Gap, Bio.Seq.DNA_A, Bio.Seq.DNA_C, Bio.Seq.DNA_M,
-    Bio.Seq.DNA_G,   Bio.Seq.DNA_R, Bio.Seq.DNA_S, Bio.Seq.DNA_V,
-    Bio.Seq.DNA_T,   Bio.Seq.DNA_W, Bio.Seq.DNA_Y, Bio.Seq.DNA_H,
-    Bio.Seq.DNA_K,   Bio.Seq.DNA_D, Bio.Seq.DNA_B, Bio.Seq.DNA_N
-]
-
-# Decode the DNA sequence in a BAM alignment into a DNASequence.
-function decode_bamseq!(seq, rec)
-    seqlen = sequence_length(rec)
-    @assert length(seq) == seqlen
-
-    i = 2
-    j = seqname_length(rec) + n_cigar_op(rec) * 4 + 1
-    while i ≤ seqlen
-        x = rec.data[j]
-        seq[i-1] = bam_nucs[(x >> 4) + 1]
-        seq[i  ] = bam_nucs[(x & 0x0f) + 1]
-        i += 2
-        j += 1
-    end
-    if isodd(seqlen)
-        x = rec.data[j]
-        seq[i-1] = bam_nucs[(x >> 4) + 1]
-    end
-
-    return seq
 end
