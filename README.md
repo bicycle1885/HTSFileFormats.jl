@@ -1,5 +1,7 @@
 # HTSFileFormats
 
+**NOTE**: This package is merged in [Bio.jl](https://github.com/BioJulia/Bio.jl).
+
 [![Build Status](https://travis-ci.org/bicycle1885/HTSFileFormats.jl.svg?branch=master)](https://travis-ci.org/bicycle1885/HTSFileFormats.jl)
 
 ## Synopsis
